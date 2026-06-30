@@ -16,6 +16,16 @@ export default function Reveal({ children, delay = 0, className = '', style }: P
     const el = ref.current
     if (!el) return
 
+    // If already visible in the viewport, show immediately with no transition
+    const rect = el.getBoundingClientRect()
+    if (rect.top < window.innerHeight * 1.05) {
+      el.style.transition = 'none'
+      el.classList.add('visible')
+      // Re-enable transition after first paint so future scroll-reveals animate
+      requestAnimationFrame(() => { el.style.transition = '' })
+      return
+    }
+
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -23,7 +33,7 @@ export default function Reveal({ children, delay = 0, className = '', style }: P
           obs.unobserve(el)
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.05, rootMargin: '0px 0px -30px 0px' }
     )
     obs.observe(el)
     return () => obs.disconnect()

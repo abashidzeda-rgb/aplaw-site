@@ -189,6 +189,7 @@ export default async function Home() {
             </div>
             <Link href="/insights" className="btn btn-ghost">{c.home_insights.cta} →</Link>
           </div>
+          {previewArticles.length > 0 && (
           <div className="insights-grid">
             <Reveal>
               <Link href={`/insights/${previewArticles[0].id}`} className="insight-card feature">
@@ -222,6 +223,7 @@ export default async function Home() {
               ))}
             </div>
           </div>
+          )}
         </div>
       </section>
 

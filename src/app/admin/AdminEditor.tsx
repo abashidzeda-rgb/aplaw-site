@@ -36,16 +36,21 @@ export default function AdminEditor({
   const [iframeLoading, setIframeLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Always tracks the latest content so debounced saves never use stale closures
+  const latestContent = useRef(content)
+  useEffect(() => { latestContent.current = content }, [content])
 
   // Deep set a nested field
   function set<S extends keyof SiteContent>(section: S, field: keyof SiteContent[S], value: string) {
-    setContent(prev => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value },
-    }))
+    const newContent: SiteContent = {
+      ...latestContent.current,
+      [section]: { ...latestContent.current[section], [field]: value },
+    }
+    latestContent.current = newContent
+    setContent(newContent)
     setStatus('idle')
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => triggerSave({ ...content, [section]: { ...content[section], [field]: value } }), 700)
+    debounceRef.current = setTimeout(() => triggerSave(latestContent.current), 700)
   }
 
   const triggerSave = useCallback((c: SiteContent) => {
@@ -78,13 +83,15 @@ export default function AdminEditor({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function setArticleField(index: number, field: keyof Article, value: any) {
-    const updated = [...(content.articles ?? [])]
+    const updated = [...(latestContent.current.articles ?? [])]
     updated[index] = { ...updated[index], [field]: value }
-    const newContent = { ...content, articles: updated }
+    const newContent = { ...latestContent.current, articles: updated }
+    // Update ref synchronously so a second call in the same event handler sees the fresh state
+    latestContent.current = newContent
     setContent(newContent)
     setStatus('idle')
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => triggerSave(newContent), 700)
+    debounceRef.current = setTimeout(() => triggerSave(latestContent.current), 700)
   }
 
   function addArticle() {
@@ -104,8 +111,9 @@ export default function AdminEditor({
       tags: ['Corporate'],
       body: '<p>Write your article here...</p>',
     }
-    const updated = [blank, ...(content.articles ?? [])]
-    const newContent = { ...content, articles: updated }
+    const updated = [blank, ...(latestContent.current.articles ?? [])]
+    const newContent = { ...latestContent.current, articles: updated }
+    latestContent.current = newContent
     setContent(newContent)
     setOpenArticle(0)
     triggerSave(newContent)
@@ -113,20 +121,22 @@ export default function AdminEditor({
 
   function deleteArticle(index: number) {
     if (!confirm('Delete this article? This cannot be undone.')) return
-    const updated = [...(content.articles ?? [])]
+    const updated = [...(latestContent.current.articles ?? [])]
     updated.splice(index, 1)
-    const newContent = { ...content, articles: updated }
+    const newContent = { ...latestContent.current, articles: updated }
+    latestContent.current = newContent
     setContent(newContent)
     if (openArticle === index) setOpenArticle(null)
     triggerSave(newContent)
   }
 
   function moveArticle(index: number, dir: -1 | 1) {
-    const updated = [...(content.articles ?? [])]
+    const updated = [...(latestContent.current.articles ?? [])]
     const swap = index + dir
     if (swap < 0 || swap >= updated.length) return
     ;[updated[index], updated[swap]] = [updated[swap], updated[index]]
-    const newContent = { ...content, articles: updated }
+    const newContent = { ...latestContent.current, articles: updated }
+    latestContent.current = newContent
     setContent(newContent)
     setOpenArticle(swap)
     triggerSave(newContent)
