@@ -1,22 +1,29 @@
 import { unstable_noStore as noStore } from 'next/cache'
 import { defaultContent, type SiteContent } from '@/content/defaults'
 
-const KV_KEY = 'aplaw_content_v2'
+const BLOB_PATHNAME = 'aplaw_content_v2.json'
 let memCache: SiteContent | null = null
 
-function kvAvailable() {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+function blobAvailable() {
+  return !!process.env.BLOB_READ_WRITE_TOKEN
 }
 
 export async function getContent(): Promise<SiteContent> {
-  noStore() // always read fresh — prevents stale static caches
-  if (kvAvailable()) {
+  noStore()
+  if (blobAvailable()) {
     try {
-      const { kv } = await import('@vercel/kv')
-      const stored = await kv.get<SiteContent>(KV_KEY)
-      if (stored) return { ...defaultContent, ...stored }
+      const { list, get } = await import('@vercel/blob')
+      const { blobs } = await list({ prefix: BLOB_PATHNAME })
+      if (blobs.length > 0) {
+        const result = await get(blobs[0].url, { access: 'private' })
+        if (result && result.statusCode === 200) {
+          const text = await new Response(result.stream).text()
+          const stored = JSON.parse(text) as SiteContent
+          return { ...defaultContent, ...stored }
+        }
+      }
     } catch (e) {
-      console.error('[content] KV read failed:', e)
+      console.error('[content] Blob read failed:', e)
     }
   }
   return memCache ?? defaultContent
@@ -24,10 +31,16 @@ export async function getContent(): Promise<SiteContent> {
 
 export async function setContent(content: SiteContent): Promise<void> {
   memCache = content
-  if (kvAvailable()) {
-    const { kv } = await import('@vercel/kv')
-    await kv.set(KV_KEY, content)
+  if (blobAvailable()) {
+    const { put } = await import('@vercel/blob')
+    await put(BLOB_PATHNAME, JSON.stringify(content), {
+      access: 'private',
+      contentType: 'application/json',
+      allowOverwrite: true,
+    })
   }
 }
 
-export { kvAvailable }
+export function kvAvailable() {
+  return blobAvailable()
+}
