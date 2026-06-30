@@ -120,30 +120,35 @@ export default function ServicesPage() {
         <div className="wrap">
           {services.map((svc, i) => (
             <Reveal key={svc.id}>
-              <div id={svc.id} className={`svc-row${i % 2 !== 0 ? ' alt' : ''}`}>
-                <div className="svc-row-text">
-                  <div className="svc-row-idx">{svc.index}</div>
-                  <h2>{svc.title}</h2>
-                  <p>{svc.description}</p>
-                  <div className="sub-tags">
-                    {svc.tags.map(tag => (
-                      <span key={tag} className="sub-tag">{tag}</span>
-                    ))}
+              <div id={svc.id}>
+                <div className={`svc-row${i % 2 !== 0 ? ' alt' : ''}`}>
+                  <div className="svc-row-text">
+                    <div className="svc-row-idx">{svc.index}</div>
+                    <h2>{svc.title}</h2>
+                    <p>{svc.description}</p>
+                    <div className="sub-tags">
+                      {svc.tags.map(tag => (
+                        <span key={tag} className="sub-tag">{tag}</span>
+                      ))}
+                    </div>
+                    <Link href="/contact" className="btn btn-ghost">
+                      Discuss your matter <span className="arr" aria-hidden>→</span>
+                    </Link>
                   </div>
-                  <Link href="/contact" className="btn btn-ghost">
-                    Discuss your matter <span className="arr" aria-hidden>→</span>
-                  </Link>
-                  {serviceFaqs[svc.id] && (
-                    <FaqAccordion items={serviceFaqs[svc.id]} />
-                  )}
+                  <Image
+                    src={svc.image}
+                    alt={svc.title}
+                    width={600}
+                    height={450}
+                    className="svc-row-img"
+                  />
                 </div>
-                <Image
-                  src={svc.image}
-                  alt={svc.title}
-                  width={600}
-                  height={450}
-                  className="svc-row-img"
-                />
+                {serviceFaqs[svc.id] && (
+                  <div className="svc-faq">
+                    <p className="svc-faq-label">Common<br />questions</p>
+                    <FaqAccordion items={serviceFaqs[svc.id]} />
+                  </div>
+                )}
               </div>
             </Reveal>
           ))}
