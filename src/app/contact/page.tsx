@@ -27,9 +27,9 @@ export default async function ContactPage() {
             {/* Form */}
             <Reveal>
               <div className="cta-form-card">
-                <Eyebrow>Send a message</Eyebrow>
+                <Eyebrow>{c.contact_page.form_heading}</Eyebrow>
                 <h2 style={{ fontSize: 'clamp(22px,2.8vw,34px)', fontWeight: 300, marginBlock: '16px 28px' }}>
-                  Tell us about your matter
+                  {c.contact_page.form_subheading}
                 </h2>
                 <ContactForm />
               </div>
@@ -51,34 +51,32 @@ export default async function ContactPage() {
                 <div className="contact-info-row">
                   <span className="cir-label">Address</span>
                   <div className="cir-value">
-                    4 Chavchavadze Ave, Floor 3<br />
-                    Tbilisi 0179, Georgia
+                    {c.contact.address_1}<br />{c.contact.address_2}
                   </div>
                 </div>
                 <div className="contact-info-row">
                   <span className="cir-label">Phone</span>
                   <div className="cir-value">
-                    <a href="tel:+995322000000">+995 32 200 00 00</a>
+                    <a href={`tel:${c.contact.phone.replace(/\s/g, '')}`}>{c.contact.phone}</a>
                   </div>
                 </div>
                 <div className="contact-info-row">
                   <span className="cir-label">Email</span>
                   <div className="cir-value">
-                    <a href="mailto:info@aplaw.ge">info@aplaw.ge</a>
+                    <a href={`mailto:${c.contact.email}`}>{c.contact.email}</a>
                   </div>
                 </div>
                 <div className="contact-info-row">
                   <span className="cir-label">Hours</span>
                   <div className="cir-value">
-                    Monday – Friday<br />
-                    9:00 – 18:00 (GET)
+                    {c.contact.hours_days}<br />{c.contact.hours_time}
                   </div>
                 </div>
                 <div className="contact-info-row">
                   <span className="cir-label">Follow</span>
                   <div className="cir-value">
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>{' · '}
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+                    <a href={c.contact.linkedin_url} target="_blank" rel="noopener noreferrer">LinkedIn</a>{' · '}
+                    <a href={c.contact.facebook_url} target="_blank" rel="noopener noreferrer">Facebook</a>
                   </div>
                 </div>
               </div>

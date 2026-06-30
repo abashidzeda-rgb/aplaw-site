@@ -165,6 +165,19 @@ export default function AdminEditor({
                   <F label="Attribution" v={content.home_quote.attribution} onChange={v => set('home_quote', 'attribution', v)} />
                 </Row>
               </Section>
+              <Section id="home_services" label="Services Section" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.home_services.eyebrow} onChange={v => set('home_services', 'eyebrow', v)} />
+                  <F label="Heading" v={content.home_services.heading} onChange={v => set('home_services', 'heading', v)} />
+                </Row>
+              </Section>
+              <Section id="home_insights" label="Insights Section" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.home_insights.eyebrow} onChange={v => set('home_insights', 'eyebrow', v)} />
+                  <F label="Heading" v={content.home_insights.heading} onChange={v => set('home_insights', 'heading', v)} />
+                  <F label="Button text" v={content.home_insights.cta} onChange={v => set('home_insights', 'cta', v)} />
+                </Row>
+              </Section>
               <Section id="cta" label="CTA Section" open={openSection} toggle={toggle}>
                 <Row>
                   <F label="Eyebrow" v={content.home_cta.eyebrow} onChange={v => set('home_cta', 'eyebrow', v)} />
@@ -184,6 +197,71 @@ export default function AdminEditor({
                 <F label="Eyebrow" v={content.about_hero.eyebrow} onChange={v => set('about_hero', 'eyebrow', v)} />
                 <F label="Title" v={content.about_hero.title} onChange={v => set('about_hero', 'title', v)} />
                 <F label="Lede" v={content.about_hero.lede} onChange={v => set('about_hero', 'lede', v)} multi />
+              </Section>
+              <Section id="about_story" label="Our Story" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.about_story.eyebrow} onChange={v => set('about_story', 'eyebrow', v)} />
+                  <F label="Heading" v={content.about_story.heading} onChange={v => set('about_story', 'heading', v)} />
+                </Row>
+                <F label="Paragraph 1" v={content.about_story.body_1} onChange={v => set('about_story', 'body_1', v)} multi />
+                <F label="Paragraph 2" v={content.about_story.body_2} onChange={v => set('about_story', 'body_2', v)} multi />
+                <F label="Paragraph 3" v={content.about_story.body_3} onChange={v => set('about_story', 'body_3', v)} multi />
+              </Section>
+              <Section id="about_values" label="Our Values" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.about_values.eyebrow} onChange={v => set('about_values', 'eyebrow', v)} />
+                  <F label="Heading" v={content.about_values.heading} onChange={v => set('about_values', 'heading', v)} />
+                </Row>
+                {(['v1','v2','v3'] as const).map((k, i) => (
+                  <Row key={k}>
+                    <F label={`Value ${i+1} title`} v={(content.about_values as any)[`${k}_title`]} onChange={v => set('about_values', `${k}_title` as any, v)} />
+                    <F label="Body" v={(content.about_values as any)[`${k}_body`]} onChange={v => set('about_values', `${k}_body` as any, v)} multi />
+                  </Row>
+                ))}
+              </Section>
+              <Section id="about_stats" label="Stats Bar" open={openSection} toggle={toggle}>
+                {(['s1','s2','s3','s4'] as const).map((k, i) => (
+                  <Row key={k}>
+                    <F label={`Stat ${i+1} number`} v={(content.about_stats as any)[`${k}_value`]} onChange={v => set('about_stats', `${k}_value` as any, v)} />
+                    <F label="Unit" v={(content.about_stats as any)[`${k}_unit`]} onChange={v => set('about_stats', `${k}_unit` as any, v)} />
+                    <F label="Label" v={(content.about_stats as any)[`${k}_label`]} onChange={v => set('about_stats', `${k}_label` as any, v)} />
+                  </Row>
+                ))}
+              </Section>
+              <Section id="about_team" label="Team Members" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.about_team.eyebrow} onChange={v => set('about_team', 'eyebrow', v)} />
+                  <F label="Heading" v={content.about_team.heading} onChange={v => set('about_team', 'heading', v)} />
+                </Row>
+                {(['m1','m2','m3'] as const).map((k, i) => (
+                  <div key={k} className="svc-block">
+                    <Row>
+                      <F label={`Member ${i+1} name`} v={(content.about_team as any)[`${k}_name`]} onChange={v => set('about_team', `${k}_name` as any, v)} />
+                      <F label="Role / Title" v={(content.about_team as any)[`${k}_role`]} onChange={v => set('about_team', `${k}_role` as any, v)} />
+                    </Row>
+                    <F label="Bio" v={(content.about_team as any)[`${k}_bio`]} onChange={v => set('about_team', `${k}_bio` as any, v)} multi />
+                  </div>
+                ))}
+              </Section>
+              <Section id="about_timeline" label="Milestones" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.about_timeline.eyebrow} onChange={v => set('about_timeline', 'eyebrow', v)} />
+                  <F label="Heading" v={content.about_timeline.heading} onChange={v => set('about_timeline', 'heading', v)} />
+                </Row>
+                {(['t1','t2','t3','t4','t5'] as const).map((k, i) => (
+                  <div key={k} className="svc-block">
+                    <Row>
+                      <F label={`Entry ${i+1} year`} v={(content.about_timeline as any)[`${k}_year`]} onChange={v => set('about_timeline', `${k}_year` as any, v)} />
+                      <F label="Title" v={(content.about_timeline as any)[`${k}_title`]} onChange={v => set('about_timeline', `${k}_title` as any, v)} />
+                    </Row>
+                    <F label="Body" v={(content.about_timeline as any)[`${k}_body`]} onChange={v => set('about_timeline', `${k}_body` as any, v)} multi />
+                  </div>
+                ))}
+              </Section>
+              <Section id="about_cta" label="CTA Band" open={openSection} toggle={toggle}>
+                <F label="Heading" v={content.about_cta.heading} onChange={v => set('about_cta', 'heading', v)} />
+                <F label="Body" v={content.about_cta.body} onChange={v => set('about_cta', 'body', v)} multi />
+                <F label="Button text" v={content.about_cta.cta} onChange={v => set('about_cta', 'cta', v)} />
               </Section>
             </>}
 
@@ -214,6 +292,12 @@ export default function AdminEditor({
                 <F label="Title" v={content.contact_hero.title} onChange={v => set('contact_hero', 'title', v)} />
                 <F label="Lede" v={content.contact_hero.lede} onChange={v => set('contact_hero', 'lede', v)} multi />
               </Section>
+              <Section id="contact_form" label="Form" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Form heading" v={content.contact_page.form_heading} onChange={v => set('contact_page', 'form_heading', v)} />
+                  <F label="Form subheading" v={content.contact_page.form_subheading} onChange={v => set('contact_page', 'form_subheading', v)} />
+                </Row>
+              </Section>
             </>}
 
             {activePage === 'global' && <>
@@ -226,6 +310,14 @@ export default function AdminEditor({
                   <F label="Phone" v={content.contact.phone} onChange={v => set('contact', 'phone', v)} />
                   <F label="Email" v={content.contact.email} onChange={v => set('contact', 'email', v)} />
                 </Row>
+                <Row>
+                  <F label="Hours — days" v={content.contact.hours_days} onChange={v => set('contact', 'hours_days', v)} />
+                  <F label="Hours — time" v={content.contact.hours_time} onChange={v => set('contact', 'hours_time', v)} />
+                </Row>
+              </Section>
+              <Section id="social" label="Social Links" open={openSection} toggle={toggle}>
+                <F label="LinkedIn URL" v={content.contact.linkedin_url} onChange={v => set('contact', 'linkedin_url', v)} />
+                <F label="Facebook URL" v={content.contact.facebook_url} onChange={v => set('contact', 'facebook_url', v)} />
               </Section>
               <Section id="footer" label="Footer" open={openSection} toggle={toggle}>
                 <F label="Tagline" v={content.footer.tagline} onChange={v => set('footer', 'tagline', v)} multi />

@@ -112,9 +112,9 @@ export default async function Home() {
       <section className="section-sm" style={{ background: 'var(--cream-2)' }}>
         <div className="wrap">
           <Reveal style={{ textAlign: 'center', marginBottom: 48 }}>
-            <Eyebrow>Practice areas</Eyebrow>
+            <Eyebrow>{c.home_services.eyebrow}</Eyebrow>
             <h2 style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 300, marginTop: 12 }}>
-              How we help
+              {c.home_services.heading}
             </h2>
           </Reveal>
           <div className="svc-grid">
@@ -185,10 +185,10 @@ export default async function Home() {
         <div className="wrap">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <Eyebrow>Insights</Eyebrow>
-              <h2 style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 300, marginTop: 12 }}>Latest from the firm</h2>
+              <Eyebrow>{c.home_insights.eyebrow}</Eyebrow>
+              <h2 style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 300, marginTop: 12 }}>{c.home_insights.heading}</h2>
             </div>
-            <Link href="/insights" className="btn btn-ghost">All articles →</Link>
+            <Link href="/insights" className="btn btn-ghost">{c.home_insights.cta} →</Link>
           </div>
           <div className="insights-grid">
             <Reveal>

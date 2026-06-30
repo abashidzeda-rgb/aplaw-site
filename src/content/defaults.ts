@@ -6,6 +6,10 @@ export const defaultContent = {
     address_2: 'Tbilisi 0179, Georgia',
     phone: '+995 32 200 00 00',
     email: 'info@aplaw.ge',
+    hours_days: 'Monday – Friday',
+    hours_time: '9:00 – 18:00 (GET)',
+    linkedin_url: 'https://linkedin.com',
+    facebook_url: 'https://facebook.com',
   },
   footer: {
     tagline: 'Business law counsel for companies operating in and through Georgia. Straightforward advice. Lasting relationships.',
@@ -44,6 +48,12 @@ export const defaultContent = {
     cta: 'About the firm',
   },
 
+  // ── Homepage: Services section ──────────────────────────────────────
+  home_services: {
+    eyebrow: 'Practice areas',
+    heading: 'How we help',
+  },
+
   // ── Homepage: Approach ──────────────────────────────────────────────
   home_approach: {
     eyebrow: 'Our Approach',
@@ -65,6 +75,13 @@ export const defaultContent = {
     attribution: 'Giorgi Abashidze, Managing Partner',
   },
 
+  // ── Homepage: Insights section ──────────────────────────────────────
+  home_insights: {
+    eyebrow: 'Insights',
+    heading: 'Latest from the firm',
+    cta: 'All articles',
+  },
+
   // ── Homepage: CTA section ───────────────────────────────────────────
   home_cta: {
     eyebrow: 'Get in touch',
@@ -75,11 +92,78 @@ export const defaultContent = {
     form_heading: 'Send a message',
   },
 
-  // ── About page ──────────────────────────────────────────────────────
+  // ── About page: Hero ────────────────────────────────────────────────
   about_hero: {
     eyebrow: 'About the Firm',
     title: 'Independent counsel since 2013',
     lede: 'We are a Tbilisi-based business law firm advising companies on Georgian law matters — with the international perspective that cross-border clients require.',
+  },
+
+  // ── About page: Story ───────────────────────────────────────────────
+  about_story: {
+    eyebrow: 'Our story',
+    heading: 'Built on a simple idea',
+    body_1: 'Abashidze & Partners was founded on the belief that business clients deserve legal advice that is direct, commercially aware, and delivered by people they can actually reach.',
+    body_2: 'When Giorgi Abashidze opened the firm in 2013, Tbilisi\'s legal market was dominated by large firms that often prioritised process over outcomes, and smaller outfits that lacked the depth for complex transactions. There was space for something different: a mid-sized firm with genuine expertise and an obsession with client service.',
+    body_3: 'Twelve years on, that is still who we are. Our clients range from early-stage companies registering their first Georgian entity to multinationals managing complex compliance programmes. What they have in common is that they value clear advice and a firm that treats their business like its own.',
+  },
+
+  // ── About page: Values ──────────────────────────────────────────────
+  about_values: {
+    eyebrow: 'What we stand for',
+    heading: 'Our values',
+    v1_title: 'Clarity',
+    v1_body: 'We believe legal advice should be clear and actionable. We translate complex law into practical guidance your business can act on.',
+    v2_title: 'Accountability',
+    v2_body: 'Partner-level involvement on every matter, from the first call to the final signature. You know who is responsible and how things are going.',
+    v3_title: 'Relationships',
+    v3_body: 'We build long-term relationships with our clients. Most of our work comes from clients who have worked with us before, and from their referrals.',
+  },
+
+  // ── About page: Stats ───────────────────────────────────────────────
+  about_stats: {
+    s1_value: '16', s1_unit: '+', s1_label: 'Years in practice',
+    s2_value: '600', s2_unit: '+', s2_label: 'Matters completed',
+    s3_value: '50', s3_unit: '+', s3_label: 'Corporate clients',
+    s4_value: '3', s4_unit: '', s4_label: 'Working languages',
+  },
+
+  // ── About page: Team ────────────────────────────────────────────────
+  about_team: {
+    eyebrow: 'Our people',
+    heading: 'Meet the team',
+    m1_name: 'Giorgi Abashidze',
+    m1_role: 'Managing Partner',
+    m1_bio: 'Giorgi founded the firm in 2013 after a decade advising on corporate and M&A transactions at leading Georgian and international firms. He holds degrees from Tbilisi State University and the University of Vienna.',
+    m2_name: 'Nino Kvaratskhelia',
+    m2_role: 'Senior Associate',
+    m2_bio: 'Nino leads our M&A and corporate practice, advising on cross-border transactions, joint ventures, and corporate governance matters. She trained in Tbilisi and Berlin and is admitted to practice in Georgia.',
+    m3_name: 'Luka Beridze',
+    m3_role: 'Associate',
+    m3_bio: 'Luka advises on dispute resolution, employment, and regulatory matters. He represents clients in Georgian state courts and arbitration proceedings and regularly publishes on Georgian commercial law.',
+  },
+
+  // ── About page: Timeline ────────────────────────────────────────────
+  about_timeline: {
+    eyebrow: 'History',
+    heading: 'Milestones',
+    t1_year: '2013', t1_title: 'Founded',
+    t1_body: 'Giorgi Abashidze establishes the firm with a focus on corporate advisory and M&A.',
+    t2_year: '2016', t2_title: 'Team expansion',
+    t2_body: 'The firm grows to five lawyers and opens its dedicated dispute resolution practice.',
+    t3_year: '2019', t3_title: 'International recognition',
+    t3_body: 'First recognition in Chambers & Partners for Corporate/Commercial work in Georgia.',
+    t4_year: '2022', t4_title: 'Real estate practice',
+    t4_body: 'Launch of dedicated real estate and infrastructure practice, reflecting growing client demand.',
+    t5_year: '2025', t5_title: 'Today',
+    t5_body: 'A team of eight lawyers serving over 50 corporate clients across six practice areas.',
+  },
+
+  // ── About page: CTA band ────────────────────────────────────────────
+  about_cta: {
+    heading: 'Work with us',
+    body: 'Whether you\'re a first-time entrant to the Georgian market or an established business facing a new challenge, we\'d like to hear from you.',
+    cta: 'Get in touch',
   },
 
   // ── Services page ───────────────────────────────────────────────────
@@ -113,6 +197,10 @@ export const defaultContent = {
     eyebrow: 'Contact',
     title: 'Let\'s talk about your matter',
     lede: 'We offer a free initial consultation to understand your situation. Use the form or reach us directly.',
+  },
+  contact_page: {
+    form_heading: 'Send a message',
+    form_subheading: 'Tell us about your matter',
   },
 
   // ── Insights page ───────────────────────────────────────────────────
