@@ -47,8 +47,7 @@ export default function AdminEditor({
       {/* Sidebar */}
       <aside className="adm-side">
         <div className="adm-brand">
-          <span className="adm-logo">A&P</span>
-          <span className="adm-title">Site Editor</span>
+          <img src="/logo-cream.svg" alt="Abashidze & Partners" className="adm-logo" />
         </div>
         <nav className="adm-nav">
           {tabs.map(t => (
@@ -173,24 +172,14 @@ export default function AdminEditor({
           height: 100svh;
         }
         .adm-brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
           margin-bottom: 36px;
+          padding-bottom: 24px;
+          border-bottom: 1px solid rgba(255,255,255,.08);
         }
         .adm-logo {
-          background: #9b7a5e;
-          color: #fff;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: .06em;
-          padding: 4px 7px;
-          border-radius: 4px;
-        }
-        .adm-title {
-          color: #d8cac1;
-          font-size: 13px;
-          font-weight: 600;
+          display: block;
+          height: 38px;
+          width: auto;
         }
         .adm-nav {
           display: flex;

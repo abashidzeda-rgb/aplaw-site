@@ -6,7 +6,7 @@ export default function LoginForm({ error }: { error: boolean }) {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div className="login-logo">A&P</div>
+        <img src="/logo-ink.svg" alt="Abashidze & Partners" className="login-logo" />
         <h1>Admin Panel</h1>
         <p>Enter your password to access the site editor.</p>
         <form action={loginAction}>
@@ -41,11 +41,10 @@ export default function LoginForm({ error }: { error: boolean }) {
           box-shadow: 0 4px 24px rgba(0,0,0,.08);
         }
         .login-logo {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: .12em;
-          color: #9b7a5e;
-          margin-bottom: 24px;
+          display: block;
+          height: 48px;
+          width: auto;
+          margin-bottom: 28px;
         }
         .login-card h1 {
           font-size: 24px;
