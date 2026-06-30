@@ -3,6 +3,7 @@
 import { useState, useTransition, useCallback, useRef, useEffect } from 'react'
 import { saveContentAction } from '@/app/actions/content'
 import { logoutAction } from '@/app/actions/auth'
+import { uploadImageAction } from '@/app/actions/upload'
 import type { SiteContent } from '@/content/defaults'
 import type { Article } from '@/lib/articles'
 
@@ -15,8 +16,8 @@ const PAGES: { id: Page; label: string }[] = [
   { id: 'home', label: 'Home' },
   { id: 'about', label: 'About' },
   { id: 'services', label: 'Services' },
-  { id: 'contact', label: 'Contact' },
   { id: 'insights', label: 'Insights' },
+  { id: 'contact', label: 'Contact' },
   { id: 'global', label: 'Global' },
 ]
 
@@ -418,7 +419,7 @@ export default function AdminEditor({
                           <F label="Author name" v={art.author} onChange={v => setArticleField(i, 'author', v)} />
                           <F label="Author role" v={art.authorRole} onChange={v => setArticleField(i, 'authorRole', v)} />
                         </Row>
-                        <F label="Author photo URL" v={art.authorImage} onChange={v => setArticleField(i, 'authorImage', v)} hint="Paste portrait image URL" />
+                        <AuthorPhotoUpload value={art.authorImage} onChange={v => setArticleField(i, 'authorImage', v)} />
                         <F label="Body (HTML)" v={art.body} onChange={v => setArticleField(i, 'body', v)} multi tall hint="Use <h2>, <p>, <ul>, <blockquote> tags" />
                       </div>
                     )}
@@ -558,6 +559,32 @@ export default function AdminEditor({
         .a-field textarea { min-height: 70px; line-height: 1.5; }
         .a-field textarea.tall { min-height: 260px; font-size: 11px; }
 
+        /* Author photo upload */
+        .a-photo-row { display: flex; align-items: center; gap: 12px; }
+        .a-avatar {
+          width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+          background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+          cursor: pointer; overflow: hidden; position: relative;
+          display: flex; align-items: center; justify-content: center;
+          transition: border-color .15s;
+        }
+        .a-avatar:hover { border-color: #9b7a5e; }
+        .a-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .a-avatar-placeholder { font-size: 20px; color: #4a3428; line-height: 1; }
+        .a-avatar-uploading {
+          position: absolute; inset: 0; background: rgba(0,0,0,.55);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 14px; color: #d8cac1; animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .a-upload-btn {
+          background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+          border-radius: 4px; color: #d8cac1; font-size: 11px; font-family: inherit;
+          padding: 6px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+        }
+        .a-upload-btn:hover:not(:disabled) { background: rgba(255,255,255,.12); border-color: #9b7a5e; }
+        .a-upload-btn:disabled { opacity: .5; cursor: default; }
+
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .a-canvas-bar {
@@ -665,6 +692,53 @@ function F({ label, v, onChange, multi, hint, tall }: {
         ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={tall ? 12 : 3} className={tall ? 'tall' : undefined} />
         : <input type="text" value={v} onChange={e => onChange(e.target.value)} />
       }
+    </div>
+  )
+}
+
+function AuthorPhotoUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [preview, setPreview] = useState<string>(value)
+  const [uploading, setUploading] = useState(false)
+
+  useEffect(() => { setPreview(value) }, [value])
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // Show local preview immediately
+    const local = URL.createObjectURL(file)
+    setPreview(local)
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const url = await uploadImageAction(fd)
+      setPreview(url)
+      onChange(url)
+    } catch {
+      setPreview(value)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="a-field">
+      <label>Author photo</label>
+      <div className="a-photo-row">
+        <div className="a-avatar" onClick={() => inputRef.current?.click()}>
+          {preview
+            ? <img src={preview} alt="Author" className="a-avatar-img" />
+            : <span className="a-avatar-placeholder">+</span>
+          }
+          {uploading && <div className="a-avatar-uploading">↑</div>}
+        </div>
+        <button type="button" className="a-upload-btn" onClick={() => inputRef.current?.click()} disabled={uploading}>
+          {uploading ? 'Uploading…' : 'Choose photo'}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      </div>
     </div>
   )
 }
