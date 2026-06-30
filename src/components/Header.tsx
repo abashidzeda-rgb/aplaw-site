@@ -31,18 +31,13 @@ export default function Header() {
 
   const closeMenu = () => setMenuOpen(false)
 
-  // Homepage hero is a dark background until scrolled — use the light
-  // logo there for contrast, same as the dark site-foot does.
-  const onDark = pathname === '/' && !scrolled
-  const logoSrc = onDark ? '/logo-cream.svg' : '/logo-ink.svg'
-
   return (
     <>
       <header className={`site-head${scrolled ? ' scrolled' : ''}`}>
         {/* Logo */}
         <Link href="/" onClick={closeMenu} aria-label="Abashidze & Partners — Home">
           <Image
-            src={logoSrc}
+            src="/logo-ink.svg"
             alt="Abashidze & Partners"
             width={142}
             height={50}

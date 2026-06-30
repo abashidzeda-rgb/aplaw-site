@@ -30,9 +30,7 @@ export default function Home() {
       <section className="hero">
         <div
           className="hero-bg"
-          style={{
-            background: 'linear-gradient(135deg, #3a2b28 0%, #271918 40%, #4a3830 100%)',
-          }}
+          style={{ background: 'var(--cream)' }}
           aria-hidden
         />
         <div className="wrap hero-content">
