@@ -3,15 +3,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Eyebrow from '@/components/Eyebrow'
 import ReadingProgress from '@/components/ReadingProgress'
-import { articles, getArticleById, getRelatedArticles } from '@/lib/articles'
+import { getArticleById, getRelatedArticles } from '@/lib/articles'
+import { getContent } from '@/lib/content'
 
-export async function generateStaticParams() {
-  return articles.map(a => ({ slug: a.id }))
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const article = getArticleById(slug)
+  const c = await getContent()
+  const article = getArticleById(c.articles ?? [], slug)
   if (!article) return {}
   return {
     title: `${article.title} — Abashidze & Partners`,
@@ -21,10 +21,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const article = getArticleById(slug)
+  const c = await getContent()
+  const article = getArticleById(c.articles ?? [], slug)
   if (!article) notFound()
 
-  const related = getRelatedArticles(article.id, 3)
+  const related = getRelatedArticles(c.articles ?? [], article.id, 3)
 
   return (
     <>

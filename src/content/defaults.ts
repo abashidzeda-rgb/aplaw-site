@@ -1,3 +1,5 @@
+import { articles as defaultArticles } from '@/lib/articles'
+
 export const defaultContent = {
 
   // ── Global / Shared ─────────────────────────────────────────────────
@@ -209,6 +211,9 @@ export const defaultContent = {
     title: 'Legal perspectives on Georgian business',
     lede: 'Practical commentary on the laws, regulations, and developments that matter to companies operating in Georgia.',
   },
+
+  // ── Blog articles ────────────────────────────────────────────────────
+  articles: defaultArticles,
 }
 
 export type SiteContent = typeof defaultContent

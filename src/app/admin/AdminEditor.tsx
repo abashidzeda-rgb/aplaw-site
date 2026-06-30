@@ -4,10 +4,11 @@ import { useState, useTransition, useCallback, useRef, useEffect } from 'react'
 import { saveContentAction } from '@/app/actions/content'
 import { logoutAction } from '@/app/actions/auth'
 import type { SiteContent } from '@/content/defaults'
+import type { Article } from '@/lib/articles'
 
-type Page = 'home' | 'about' | 'services' | 'contact' | 'global'
+type Page = 'home' | 'about' | 'services' | 'contact' | 'global' | 'insights'
 const PAGE_URLS: Record<Page, string> = {
-  home: '/', about: '/about', services: '/services', contact: '/contact', global: '/',
+  home: '/', about: '/about', services: '/services', contact: '/contact', global: '/', insights: '/insights',
 }
 
 const PAGES: { id: Page; label: string }[] = [
@@ -15,8 +16,13 @@ const PAGES: { id: Page; label: string }[] = [
   { id: 'about', label: 'About' },
   { id: 'services', label: 'Services' },
   { id: 'contact', label: 'Contact' },
+  { id: 'insights', label: 'Insights' },
   { id: 'global', label: 'Global' },
 ]
+
+function slugify(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `article-${Date.now()}`
+}
 
 export default function AdminEditor({
   initialContent, kvReady,
@@ -24,6 +30,7 @@ export default function AdminEditor({
   const [content, setContent] = useState(initialContent)
   const [activePage, setActivePage] = useState<Page>('home')
   const [openSection, setOpenSection] = useState<string | null>('hero')
+  const [openArticle, setOpenArticle] = useState<number | null>(null)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [iframeKey, setIframeKey] = useState(0)
   const [iframeLoading, setIframeLoading] = useState(true)
@@ -62,11 +69,67 @@ export default function AdminEditor({
     setActivePage(p)
     setIframeLoading(true)
     setIframeKey(k => k + 1)
-    // open first section of new page
     const firstSection: Record<Page, string> = {
-      home: 'hero', about: 'about_hero', services: 'services_hero', contact: 'contact_hero', global: 'contact',
+      home: 'hero', about: 'about_hero', services: 'services_hero', contact: 'contact_hero', global: 'contact', insights: 'insights_hero',
     }
     setOpenSection(firstSection[p])
+    setOpenArticle(null)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function setArticleField(index: number, field: keyof Article, value: any) {
+    const updated = [...(content.articles ?? [])]
+    updated[index] = { ...updated[index], [field]: value }
+    const newContent = { ...content, articles: updated }
+    setContent(newContent)
+    setStatus('idle')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => triggerSave(newContent), 700)
+  }
+
+  function addArticle() {
+    const now = new Date()
+    const date = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    const blank: Article = {
+      id: `article-${Date.now()}`,
+      title: 'New Article',
+      category: 'Corporate',
+      readTime: '5 min read',
+      author: '',
+      authorRole: '',
+      date,
+      excerpt: '',
+      image: '',
+      authorImage: '',
+      tags: ['Corporate'],
+      body: '<p>Write your article here...</p>',
+    }
+    const updated = [blank, ...(content.articles ?? [])]
+    const newContent = { ...content, articles: updated }
+    setContent(newContent)
+    setOpenArticle(0)
+    triggerSave(newContent)
+  }
+
+  function deleteArticle(index: number) {
+    if (!confirm('Delete this article? This cannot be undone.')) return
+    const updated = [...(content.articles ?? [])]
+    updated.splice(index, 1)
+    const newContent = { ...content, articles: updated }
+    setContent(newContent)
+    if (openArticle === index) setOpenArticle(null)
+    triggerSave(newContent)
+  }
+
+  function moveArticle(index: number, dir: -1 | 1) {
+    const updated = [...(content.articles ?? [])]
+    const swap = index + dir
+    if (swap < 0 || swap >= updated.length) return
+    ;[updated[index], updated[swap]] = [updated[swap], updated[index]]
+    const newContent = { ...content, articles: updated }
+    setContent(newContent)
+    setOpenArticle(swap)
+    triggerSave(newContent)
   }
 
   const toggle = (s: string) => setOpenSection(prev => prev === s ? null : s)
@@ -301,6 +364,59 @@ export default function AdminEditor({
               </Section>
             </>}
 
+            {activePage === 'insights' && <>
+              <Section id="insights_hero" label="Page Hero" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.insights_hero.eyebrow} onChange={v => set('insights_hero', 'eyebrow', v)} />
+                <F label="Title" v={content.insights_hero.title} onChange={v => set('insights_hero', 'title', v)} />
+                <F label="Lede" v={content.insights_hero.lede} onChange={v => set('insights_hero', 'lede', v)} multi />
+              </Section>
+              <div className="a-sec">
+                <div className="a-articles-header">
+                  <span className="a-articles-label">Articles ({(content.articles ?? []).length})</span>
+                  <button className="a-btn-add" onClick={addArticle}>+ New article</button>
+                </div>
+                {(content.articles ?? []).map((art, i) => (
+                  <div key={art.id} className="a-article-row">
+                    <button
+                      className={`a-article-toggle${openArticle === i ? ' open' : ''}`}
+                      onClick={() => setOpenArticle(prev => prev === i ? null : i)}
+                    >
+                      <span className="a-article-title">{art.title || 'Untitled'}</span>
+                      <span className="a-article-meta">{art.category} · {art.date}</span>
+                      <span className="a-sec-chevron">›</span>
+                    </button>
+                    {openArticle === i && (
+                      <div className="a-sec-body">
+                        <div className="a-article-actions">
+                          <button className="a-act-btn" onClick={() => moveArticle(i, -1)} disabled={i === 0} title="Move up">↑</button>
+                          <button className="a-act-btn" onClick={() => moveArticle(i, 1)} disabled={i === (content.articles ?? []).length - 1} title="Move down">↓</button>
+                          <button className="a-act-btn danger" onClick={() => deleteArticle(i)}>Delete</button>
+                          <a className="a-act-link" href={`/insights/${art.id}`} target="_blank" rel="noopener">View ↗</a>
+                        </div>
+                        <F label="Title" v={art.title} onChange={v => { setArticleField(i, 'title', v); setArticleField(i, 'id', slugify(v)) }} />
+                        <Row>
+                          <F label="Category" v={art.category} onChange={v => setArticleField(i, 'category', v)} hint="Corporate, M&A, Disputes…" />
+                          <F label="Date" v={art.date} onChange={v => setArticleField(i, 'date', v)} hint="e.g. March 12, 2025" />
+                        </Row>
+                        <Row>
+                          <F label="Read time" v={art.readTime} onChange={v => setArticleField(i, 'readTime', v)} hint="e.g. 7 min read" />
+                          <F label="Tags (comma-separated)" v={art.tags.join(', ')} onChange={v => setArticleField(i, 'tags', v.split(',').map(t => t.trim()).filter(Boolean) as any)} />
+                        </Row>
+                        <F label="Excerpt (shown in cards)" v={art.excerpt} onChange={v => setArticleField(i, 'excerpt', v)} multi />
+                        <F label="Cover image URL" v={art.image} onChange={v => setArticleField(i, 'image', v)} hint="Paste any image URL (jpg, png, webp)" />
+                        <Row>
+                          <F label="Author name" v={art.author} onChange={v => setArticleField(i, 'author', v)} />
+                          <F label="Author role" v={art.authorRole} onChange={v => setArticleField(i, 'authorRole', v)} />
+                        </Row>
+                        <F label="Author photo URL" v={art.authorImage} onChange={v => setArticleField(i, 'authorImage', v)} hint="Paste portrait image URL" />
+                        <F label="Body (HTML)" v={art.body} onChange={v => setArticleField(i, 'body', v)} multi tall hint="Use <h2>, <p>, <ul>, <blockquote> tags" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>}
+
             {activePage === 'global' && <>
               <Section id="contact" label="Contact Info" open={openSection} toggle={toggle}>
                 <Row>
@@ -430,6 +546,7 @@ export default function AdminEditor({
           border-color: #9b7a5e; background: rgba(255,255,255,.1);
         }
         .a-field textarea { min-height: 70px; line-height: 1.5; }
+        .a-field textarea.tall { min-height: 260px; font-size: 11px; }
 
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -453,6 +570,40 @@ export default function AdminEditor({
         .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; font-family: monospace; }
         .a-canvas-open { font-size: 11px; color: #6b5a54; text-decoration: none; transition: color .15s; }
         .a-canvas-open:hover { color: #d8cac1; }
+        /* Articles list */
+        .a-articles-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .a-articles-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #a89080; }
+        .a-btn-add {
+          padding: 4px 10px; background: rgba(155,122,94,.2); border: 1px solid rgba(155,122,94,.4);
+          color: #d8cac1; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;
+          letter-spacing: .04em; transition: background .15s;
+        }
+        .a-btn-add:hover { background: rgba(155,122,94,.4); }
+        .a-article-row { border-bottom: 1px solid rgba(255,255,255,.05); }
+        .a-article-toggle {
+          width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+          background: none; border: none; cursor: pointer; text-align: left;
+          transition: background .15s;
+        }
+        .a-article-toggle:hover { background: rgba(255,255,255,.03); }
+        .a-article-toggle.open { background: rgba(255,255,255,.04); }
+        .a-article-title { flex: 1; font-size: 12px; color: #c8b8b0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .a-article-meta { font-size: 10px; color: #4a3428; flex-shrink: 0; }
+        .a-article-actions { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .a-act-btn {
+          padding: 3px 10px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+          color: #a89080; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all .15s;
+        }
+        .a-act-btn:hover:not(:disabled) { background: rgba(255,255,255,.14); color: #d8cac1; }
+        .a-act-btn:disabled { opacity: .3; cursor: default; }
+        .a-act-btn.danger { color: #e07070; border-color: rgba(224,112,112,.3); }
+        .a-act-btn.danger:hover { background: rgba(224,112,112,.15); }
+        .a-act-link { font-size: 11px; color: #6b5a54; text-decoration: none; margin-left: auto; }
+        .a-act-link:hover { color: #d8cac1; }
+
         .a-iframe-wrap { flex: 1; position: relative; background: #fff; }
         .a-iframe { width: 100%; height: 100%; border: none; display: block; }
         .a-iframe-loading {
@@ -493,15 +644,15 @@ function Row({ children, cols3 }: { children: React.ReactNode; cols3?: boolean }
   return <div className={`a-row${cols3 ? ' cols-3' : ''}`}>{children}</div>
 }
 
-function F({ label, v, onChange, multi, hint }: {
-  label: string; v: string; onChange: (v: string) => void; multi?: boolean; hint?: string
+function F({ label, v, onChange, multi, hint, tall }: {
+  label: string; v: string; onChange: (v: string) => void; multi?: boolean; hint?: string; tall?: boolean
 }) {
   return (
     <div className="a-field">
       <label>{label}</label>
       {hint && <span className="hint">{hint}</span>}
       {multi
-        ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={3} />
+        ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={tall ? 12 : 3} className={tall ? 'tall' : undefined} />
         : <input type="text" value={v} onChange={e => onChange(e.target.value)} />
       }
     </div>

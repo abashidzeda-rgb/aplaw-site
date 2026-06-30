@@ -347,10 +347,10 @@ export const articles: Article[] = [
   },
 ]
 
-export function getArticleById(id: string): Article | undefined {
-  return articles.find(a => a.id === id)
+export function getArticleById(pool: Article[], id: string): Article | undefined {
+  return pool.find(a => a.id === id)
 }
 
-export function getRelatedArticles(currentId: string, count = 3): Article[] {
-  return articles.filter(a => a.id !== currentId).slice(0, count)
+export function getRelatedArticles(pool: Article[], currentId: string, count = 3): Article[] {
+  return pool.filter(a => a.id !== currentId).slice(0, count)
 }

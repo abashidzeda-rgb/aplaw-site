@@ -4,13 +4,12 @@ import Eyebrow from '@/components/Eyebrow'
 import Reveal from '@/components/Reveal'
 import StatCounter from '@/components/StatCounter'
 import ContactForm from '@/components/ContactForm'
-import { articles } from '@/lib/articles'
 import { services } from '@/lib/services'
 import { getContent } from '@/lib/content'
 
 export default async function Home() {
   const c = await getContent()
-  const previewArticles = articles.slice(0, 4)
+  const previewArticles = (c.articles ?? []).slice(0, 4)
 
   const stats = [
     { value: Number(c.home_stats.s1_value), unit: c.home_stats.s1_unit, label: c.home_stats.s1_label },

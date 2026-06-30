@@ -4,7 +4,6 @@ import PageHero from '@/components/PageHero'
 import Reveal from '@/components/Reveal'
 import BlogFilter from '@/components/BlogFilter'
 import NewsletterForm from '@/components/NewsletterForm'
-import { articles } from '@/lib/articles'
 import { getContent } from '@/lib/content'
 
 export const metadata = {
@@ -14,8 +13,9 @@ export const metadata = {
 
 export default async function InsightsPage() {
   const c = await getContent()
-  const featured = articles[0]
-  const rest = articles.slice(1)
+  const allArticles = c.articles ?? []
+  const featured = allArticles[0]
+  const rest = allArticles.slice(1)
 
   return (
     <>
