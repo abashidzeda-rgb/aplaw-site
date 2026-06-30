@@ -339,14 +339,8 @@ export default function AdminEditor({
         {/* ── Canvas ── */}
         <div className="a-canvas">
           <div className="a-canvas-bar">
-            <div className="a-canvas-tabs">
-              {PAGES.map(p => (
-                <button key={p.id} className={`a-ctab${activePage === p.id ? ' active' : ''}`} onClick={() => switchPage(p.id)}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            <div className="a-canvas-url">{PAGE_URLS[activePage]}</div>
+            <span className="a-canvas-url">aplaw-site.vercel.app{PAGE_URLS[activePage]}</span>
+            <a href={PAGE_URLS[activePage]} target="_blank" rel="noopener" className="a-canvas-open">↗ Open</a>
           </div>
           <div className="a-iframe-wrap">
             {iframeLoading && (
@@ -452,20 +446,17 @@ export default function AdminEditor({
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .a-canvas-bar {
-          height: 40px; flex-shrink: 0;
+          height: 36px; flex-shrink: 0;
           background: #181210; border-bottom: 1px solid rgba(255,255,255,.06);
-          display: flex; align-items: center; padding: 0 12px; gap: 12px;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 0 14px; gap: 12px;
         }
-        .a-canvas-tabs { display: flex; gap: 2px; }
-        .a-ctab {
-          padding: 4px 10px; background: none; border: none;
-          color: #6b5a54; font-size: 11px; font-weight: 600; cursor: pointer;
-          border-radius: 4px; transition: background .15s, color .15s;
-          letter-spacing: .03em;
+        .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; font-family: monospace; }
+        .a-canvas-open {
+          font-size: 11px; color: #6b5a54; text-decoration: none;
+          transition: color .15s;
         }
-        .a-ctab:hover { background: rgba(255,255,255,.06); color: #a89080; }
-        .a-ctab.active { background: rgba(255,255,255,.1); color: #d8cac1; }
-        .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; }
+        .a-canvas-open:hover { color: #d8cac1; }
         .a-iframe-wrap { flex: 1; position: relative; background: #fff; }
         .a-iframe { width: 100%; height: 100%; border: none; display: block; }
         .a-iframe-loading {
