@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getContent } from '@/lib/content'
 import Image from 'next/image'
 import PageHero from '@/components/PageHero'
 import Eyebrow from '@/components/Eyebrow'
@@ -37,13 +38,14 @@ const timeline = [
   { year: '2025', title: 'Today', body: 'A team of eight lawyers serving over 50 corporate clients across six practice areas.' },
 ]
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const c = await getContent()
   return (
     <>
       <PageHero
-        eyebrow="About the firm"
-        title="Independent counsel since 2013"
-        lede="We are a Tbilisi-based business law firm advising companies on Georgian law matters — with the international perspective that cross-border clients require."
+        eyebrow={c.about_hero.eyebrow}
+        title={c.about_hero.title}
+        lede={c.about_hero.lede}
         breadcrumb={{ label: 'Home', href: '/' }}
       />
 

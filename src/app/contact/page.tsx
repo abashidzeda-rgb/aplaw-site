@@ -2,19 +2,21 @@ import PageHero from '@/components/PageHero'
 import Reveal from '@/components/Reveal'
 import Eyebrow from '@/components/Eyebrow'
 import ContactForm from '@/components/ContactForm'
+import { getContent } from '@/lib/content'
 
 export const metadata = {
   title: 'Contact — Abashidze & Partners',
   description: 'Get in touch with Abashidze & Partners. Book a consultation or send us a message about your legal matter.',
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const c = await getContent()
   return (
     <>
       <PageHero
-        eyebrow="Contact"
-        title="Let's talk about your matter"
-        lede="We offer a free initial consultation to understand your situation. Use the form or reach us directly."
+        eyebrow={c.contact_hero.eyebrow}
+        title={c.contact_hero.title}
+        lede={c.contact_hero.lede}
         breadcrumb={{ label: 'Home', href: '/' }}
       />
 

@@ -5,22 +5,24 @@ import Reveal from '@/components/Reveal'
 import BlogFilter from '@/components/BlogFilter'
 import NewsletterForm from '@/components/NewsletterForm'
 import { articles } from '@/lib/articles'
+import { getContent } from '@/lib/content'
 
 export const metadata = {
   title: 'Insights — Abashidze & Partners',
   description: 'Practical legal insights on Georgian business law — corporate, M&A, employment, real estate, tax, and regulatory matters.',
 }
 
-export default function InsightsPage() {
+export default async function InsightsPage() {
+  const c = await getContent()
   const featured = articles[0]
   const rest = articles.slice(1)
 
   return (
     <>
       <PageHero
-        eyebrow="Insights"
-        title="Legal perspectives on Georgian business"
-        lede="Practical commentary on the laws, regulations, and developments that matter to companies operating in Georgia."
+        eyebrow={c.insights_hero.eyebrow}
+        title={c.insights_hero.title}
+        lede={c.insights_hero.lede}
         breadcrumb={{ label: 'Home', href: '/' }}
       />
 

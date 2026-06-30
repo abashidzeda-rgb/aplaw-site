@@ -1,347 +1,413 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useCallback, useRef, useEffect } from 'react'
 import { saveContentAction } from '@/app/actions/content'
 import { logoutAction } from '@/app/actions/auth'
 import type { SiteContent } from '@/content/defaults'
 
-type Tab = 'hero' | 'about' | 'contact' | 'footer'
+type Page = 'home' | 'about' | 'services' | 'contact' | 'global'
+const PAGE_URLS: Record<Page, string> = {
+  home: '/', about: '/about', services: '/services', contact: '/contact', global: '/',
+}
+
+const PAGES: { id: Page; label: string }[] = [
+  { id: 'home', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'services', label: 'Services' },
+  { id: 'contact', label: 'Contact' },
+  { id: 'global', label: 'Global' },
+]
 
 export default function AdminEditor({
-  initialContent,
-  kvReady,
-}: {
-  initialContent: SiteContent
-  kvReady: boolean
-}) {
-  const [tab, setTab] = useState<Tab>('hero')
+  initialContent, kvReady,
+}: { initialContent: SiteContent; kvReady: boolean }) {
   const [content, setContent] = useState(initialContent)
-  const [saved, setSaved] = useState(false)
+  const [activePage, setActivePage] = useState<Page>('home')
+  const [openSection, setOpenSection] = useState<string | null>('hero')
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [iframeKey, setIframeKey] = useState(0)
+  const [iframeLoading, setIframeLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  function set(section: keyof SiteContent, field: string, value: string) {
+  // Deep set a nested field
+  function set<S extends keyof SiteContent>(section: S, field: keyof SiteContent[S], value: string) {
     setContent(prev => ({
       ...prev,
       [section]: { ...prev[section], [field]: value },
     }))
-    setSaved(false)
+    setStatus('idle')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => triggerSave({ ...content, [section]: { ...content[section], [field]: value } }), 700)
   }
 
-  function save() {
+  const triggerSave = useCallback((c: SiteContent) => {
+    setStatus('saving')
     startTransition(async () => {
-      await saveContentAction(content)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      try {
+        await saveContentAction(c)
+        setStatus('saved')
+        setIframeKey(k => k + 1)
+        setTimeout(() => setStatus('idle'), 2500)
+      } catch {
+        setStatus('error')
+      }
     })
+  }, [])
+
+  // Cleanup debounce on unmount
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current) }, [])
+
+  function switchPage(p: Page) {
+    setActivePage(p)
+    setIframeLoading(true)
+    setIframeKey(k => k + 1)
+    // open first section of new page
+    const firstSection: Record<Page, string> = {
+      home: 'hero', about: 'about_hero', services: 'services_hero', contact: 'contact_hero', global: 'contact',
+    }
+    setOpenSection(firstSection[p])
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'hero', label: 'Hero' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
-    { id: 'footer', label: 'Footer' },
-  ]
+  const toggle = (s: string) => setOpenSection(prev => prev === s ? null : s)
+
+  const statusLabel = {
+    idle: kvReady ? '● Live' : '● Memory only',
+    saving: '↻ Saving…',
+    saved: '✓ Saved',
+    error: '✗ Error',
+  }[status]
+
+  const statusColor = { idle: kvReady ? '#4caf7d' : '#f0a500', saving: '#9b8880', saved: '#4caf7d', error: '#e05a5a' }[status]
 
   return (
-    <div className="adm">
-      {/* Sidebar */}
-      <aside className="adm-side">
-        <div className="adm-brand">
-          <img src="/logo-cream.svg" alt="Abashidze & Partners" className="adm-logo" />
+    <div className="a-wrap">
+      {/* ── Header ── */}
+      <header className="a-header">
+        <img src="/logo-cream.svg" alt="Abashidze & Partners" className="a-hlogo" />
+        <div className="a-header-mid">
+          <span className="a-status" style={{ color: statusColor }}>{statusLabel}</span>
+          {!kvReady && <span className="a-kv-warn">Vercel KV not connected — <a href="https://vercel.com/docs/storage/vercel-kv" target="_blank" rel="noopener">set up KV</a> to persist across deploys</span>}
         </div>
-        <nav className="adm-nav">
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              className={`adm-tab${tab === t.id ? ' active' : ''}`}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
-        <div className="adm-side-footer">
-          <a href="/" target="_blank" className="adm-view-site">View site ↗</a>
-          <form action={logoutAction}>
-            <button type="submit" className="adm-logout">Log out</button>
+        <div className="a-header-actions">
+          <form action={logoutAction} style={{ margin: 0 }}>
+            <button type="submit" className="a-btn-ghost">Log out</button>
           </form>
+          <a href="/" target="_blank" className="a-btn-ghost">View site ↗</a>
         </div>
-      </aside>
+      </header>
 
-      {/* Main */}
-      <main className="adm-main">
-        <div className="adm-topbar">
-          <div>
-            <h2 className="adm-section-title">
-              {tabs.find(t => t.id === tab)?.label}
-            </h2>
-            {!kvReady && (
-              <p className="adm-notice">
-                ⚠ Vercel KV not connected — changes save to memory only (lost on redeploy).{' '}
-                <a href="https://vercel.com/docs/storage/vercel-kv" target="_blank" rel="noopener">
-                  Connect KV
-                </a>{' '}
-                to persist.
-              </p>
-            )}
+      <div className="a-body">
+        {/* ── Left Panel ── */}
+        <aside className="a-left">
+          {/* Page tabs */}
+          <div className="a-page-tabs">
+            {PAGES.map(p => (
+              <button key={p.id} className={`a-page-tab${activePage === p.id ? ' active' : ''}`} onClick={() => switchPage(p.id)}>
+                {p.label}
+              </button>
+            ))}
           </div>
-          <button
-            className="adm-save"
-            onClick={save}
-            disabled={isPending}
-          >
-            {isPending ? 'Saving…' : saved ? '✓ Saved' : 'Save changes'}
-          </button>
-        </div>
 
-        <div className="adm-fields">
-          {tab === 'hero' && (
-            <>
-              <Field label="Eyebrow text" value={content.hero.eyebrow}
-                onChange={v => set('hero', 'eyebrow', v)} />
-              <div className="adm-row">
-                <Field label="Headline — line 1" value={content.hero.headline_1}
-                  onChange={v => set('hero', 'headline_1', v)} />
-                <Field label="Headline — italic word" value={content.hero.headline_em}
-                  onChange={v => set('hero', 'headline_em', v)} hint="Renders in gold italic" />
-                <Field label="Headline — line 3" value={content.hero.headline_3}
-                  onChange={v => set('hero', 'headline_3', v)} />
+          {/* Sections */}
+          <div className="a-sections">
+            {activePage === 'home' && <>
+              <Section id="hero" label="Hero" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.home_hero.eyebrow} onChange={v => set('home_hero', 'eyebrow', v)} />
+                <Row>
+                  <F label="Headline line 1" v={content.home_hero.headline_1} onChange={v => set('home_hero', 'headline_1', v)} />
+                  <F label="Italic word" v={content.home_hero.headline_em} onChange={v => set('home_hero', 'headline_em', v)} hint="renders in gold italic" />
+                  <F label="Headline line 3" v={content.home_hero.headline_3} onChange={v => set('home_hero', 'headline_3', v)} />
+                </Row>
+                <F label="Lede paragraph" v={content.home_hero.lede} onChange={v => set('home_hero', 'lede', v)} multi />
+                <Row>
+                  <F label="Primary button" v={content.home_hero.cta_primary} onChange={v => set('home_hero', 'cta_primary', v)} />
+                  <F label="Secondary button" v={content.home_hero.cta_secondary} onChange={v => set('home_hero', 'cta_secondary', v)} />
+                </Row>
+              </Section>
+              <Section id="stats" label="Stats" open={openSection} toggle={toggle}>
+                {(['s1','s2','s3','s4'] as const).map((k, i) => (
+                  <Row key={k}>
+                    <F label={`Stat ${i+1} — Number`} v={(content.home_stats as any)[`${k}_value`]} onChange={v => set('home_stats', `${k}_value` as any, v)} />
+                    <F label="Unit" v={(content.home_stats as any)[`${k}_unit`]} onChange={v => set('home_stats', `${k}_unit` as any, v)} />
+                    <F label="Label" v={(content.home_stats as any)[`${k}_label`]} onChange={v => set('home_stats', `${k}_label` as any, v)} />
+                  </Row>
+                ))}
+              </Section>
+              <Section id="about" label="About Section" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.home_about.eyebrow} onChange={v => set('home_about', 'eyebrow', v)} />
+                <F label="Headline" v={content.home_about.headline} onChange={v => set('home_about', 'headline', v)} multi hint="newline = line break" />
+                <F label="Body paragraph" v={content.home_about.body} onChange={v => set('home_about', 'body', v)} multi />
+                <Row><F label="Point 1 title" v={content.home_about.p1_title} onChange={v => set('home_about', 'p1_title', v)} /><F label="Point 1 body" v={content.home_about.p1_body} onChange={v => set('home_about', 'p1_body', v)} /></Row>
+                <Row><F label="Point 2 title" v={content.home_about.p2_title} onChange={v => set('home_about', 'p2_title', v)} /><F label="Point 2 body" v={content.home_about.p2_body} onChange={v => set('home_about', 'p2_body', v)} /></Row>
+                <Row><F label="Point 3 title" v={content.home_about.p3_title} onChange={v => set('home_about', 'p3_title', v)} /><F label="Point 3 body" v={content.home_about.p3_body} onChange={v => set('home_about', 'p3_body', v)} /></Row>
+                <F label="CTA link text" v={content.home_about.cta} onChange={v => set('home_about', 'cta', v)} />
+              </Section>
+              <Section id="approach" label="Approach Steps" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.home_approach.eyebrow} onChange={v => set('home_approach', 'eyebrow', v)} />
+                  <F label="Heading" v={content.home_approach.heading} onChange={v => set('home_approach', 'heading', v)} />
+                </Row>
+                {(['s1','s2','s3','s4'] as const).map((k, i) => (
+                  <div key={k}>
+                    <Row>
+                      <F label={`Step ${i+1} number`} v={(content.home_approach as any)[`${k}_n`]} onChange={v => set('home_approach', `${k}_n` as any, v)} />
+                      <F label={`Step ${i+1} title`} v={(content.home_approach as any)[`${k}_title`]} onChange={v => set('home_approach', `${k}_title` as any, v)} />
+                    </Row>
+                    <F label={`Step ${i+1} body`} v={(content.home_approach as any)[`${k}_body`]} onChange={v => set('home_approach', `${k}_body` as any, v)} multi />
+                  </div>
+                ))}
+              </Section>
+              <Section id="quote" label="Quote Band" open={openSection} toggle={toggle}>
+                <F label="Quote text — use {word} for italic" v={content.home_quote.text} onChange={v => set('home_quote', 'text', v)} multi />
+                <Row>
+                  <F label="Italic word" v={content.home_quote.em} onChange={v => set('home_quote', 'em', v)} hint="must match {word} above" />
+                  <F label="Attribution" v={content.home_quote.attribution} onChange={v => set('home_quote', 'attribution', v)} />
+                </Row>
+              </Section>
+              <Section id="cta" label="CTA Section" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Eyebrow" v={content.home_cta.eyebrow} onChange={v => set('home_cta', 'eyebrow', v)} />
+                  <F label="Form card heading" v={content.home_cta.form_heading} onChange={v => set('home_cta', 'form_heading', v)} />
+                </Row>
+                <F label="Heading" v={content.home_cta.heading} onChange={v => set('home_cta', 'heading', v)} />
+                <F label="Body" v={content.home_cta.body} onChange={v => set('home_cta', 'body', v)} multi />
+                <Row>
+                  <F label="Primary button" v={content.home_cta.cta_primary} onChange={v => set('home_cta', 'cta_primary', v)} />
+                  <F label="Secondary button" v={content.home_cta.cta_secondary} onChange={v => set('home_cta', 'cta_secondary', v)} />
+                </Row>
+              </Section>
+            </>}
+
+            {activePage === 'about' && <>
+              <Section id="about_hero" label="Page Hero" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.about_hero.eyebrow} onChange={v => set('about_hero', 'eyebrow', v)} />
+                <F label="Title" v={content.about_hero.title} onChange={v => set('about_hero', 'title', v)} />
+                <F label="Lede" v={content.about_hero.lede} onChange={v => set('about_hero', 'lede', v)} multi />
+              </Section>
+            </>}
+
+            {activePage === 'services' && <>
+              <Section id="services_hero" label="Page Hero" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.services_hero.eyebrow} onChange={v => set('services_hero', 'eyebrow', v)} />
+                <F label="Title" v={content.services_hero.title} onChange={v => set('services_hero', 'title', v)} />
+                <F label="Lede" v={content.services_hero.lede} onChange={v => set('services_hero', 'lede', v)} multi />
+              </Section>
+              <Section id="services_items" label="Service Descriptions" open={openSection} toggle={toggle}>
+                {(['s1','s2','s3','s4','s5','s6'] as const).map((k, i) => (
+                  <div key={k} className="svc-block">
+                    <F label={`${String(i+1).padStart(2,'0')} Title`} v={(content.services_items as any)[`${k}_title`]} onChange={v => set('services_items', `${k}_title` as any, v)} />
+                    <F label="Description" v={(content.services_items as any)[`${k}_desc`]} onChange={v => set('services_items', `${k}_desc` as any, v)} multi />
+                  </div>
+                ))}
+              </Section>
+              <Section id="services_cta" label="CTA Band" open={openSection} toggle={toggle}>
+                <F label="Heading" v={content.services_cta.heading} onChange={v => set('services_cta', 'heading', v)} />
+                <F label="Body" v={content.services_cta.body} onChange={v => set('services_cta', 'body', v)} multi />
+                <F label="Button text" v={content.services_cta.cta} onChange={v => set('services_cta', 'cta', v)} />
+              </Section>
+            </>}
+
+            {activePage === 'contact' && <>
+              <Section id="contact_hero" label="Page Hero" open={openSection} toggle={toggle}>
+                <F label="Eyebrow" v={content.contact_hero.eyebrow} onChange={v => set('contact_hero', 'eyebrow', v)} />
+                <F label="Title" v={content.contact_hero.title} onChange={v => set('contact_hero', 'title', v)} />
+                <F label="Lede" v={content.contact_hero.lede} onChange={v => set('contact_hero', 'lede', v)} multi />
+              </Section>
+            </>}
+
+            {activePage === 'global' && <>
+              <Section id="contact" label="Contact Info" open={openSection} toggle={toggle}>
+                <Row>
+                  <F label="Address line 1" v={content.contact.address_1} onChange={v => set('contact', 'address_1', v)} />
+                  <F label="Address line 2" v={content.contact.address_2} onChange={v => set('contact', 'address_2', v)} />
+                </Row>
+                <Row>
+                  <F label="Phone" v={content.contact.phone} onChange={v => set('contact', 'phone', v)} />
+                  <F label="Email" v={content.contact.email} onChange={v => set('contact', 'email', v)} />
+                </Row>
+              </Section>
+              <Section id="footer" label="Footer" open={openSection} toggle={toggle}>
+                <F label="Tagline" v={content.footer.tagline} onChange={v => set('footer', 'tagline', v)} multi />
+              </Section>
+            </>}
+          </div>
+        </aside>
+
+        {/* ── Canvas ── */}
+        <div className="a-canvas">
+          <div className="a-canvas-bar">
+            <div className="a-canvas-tabs">
+              {PAGES.map(p => (
+                <button key={p.id} className={`a-ctab${activePage === p.id ? ' active' : ''}`} onClick={() => switchPage(p.id)}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="a-canvas-url">{PAGE_URLS[activePage]}</div>
+          </div>
+          <div className="a-iframe-wrap">
+            {iframeLoading && (
+              <div className="a-iframe-loading">
+                <div className="a-spinner" />
               </div>
-              <Field label="Lede paragraph" value={content.hero.lede}
-                onChange={v => set('hero', 'lede', v)} multiline />
-              <div className="adm-row">
-                <Field label="Primary button text" value={content.hero.cta_primary}
-                  onChange={v => set('hero', 'cta_primary', v)} />
-                <Field label="Secondary button text" value={content.hero.cta_secondary}
-                  onChange={v => set('hero', 'cta_secondary', v)} />
-              </div>
-            </>
-          )}
-
-          {tab === 'about' && (
-            <>
-              <Field label="Eyebrow" value={content.about_preview.eyebrow}
-                onChange={v => set('about_preview', 'eyebrow', v)} />
-              <Field label="Headline" value={content.about_preview.headline}
-                onChange={v => set('about_preview', 'headline', v)}
-                multiline hint="Use a newline to break the headline into two lines" />
-              <Field label="Body paragraph" value={content.about_preview.body}
-                onChange={v => set('about_preview', 'body', v)} multiline />
-            </>
-          )}
-
-          {tab === 'contact' && (
-            <>
-              <Field label="Address — line 1" value={content.contact.address_1}
-                onChange={v => set('contact', 'address_1', v)} />
-              <Field label="Address — line 2" value={content.contact.address_2}
-                onChange={v => set('contact', 'address_2', v)} />
-              <Field label="Phone number" value={content.contact.phone}
-                onChange={v => set('contact', 'phone', v)} />
-              <Field label="Email address" value={content.contact.email}
-                onChange={v => set('contact', 'email', v)} />
-            </>
-          )}
-
-          {tab === 'footer' && (
-            <>
-              <Field label="Footer tagline" value={content.footer.tagline}
-                onChange={v => set('footer', 'tagline', v)} multiline />
-            </>
-          )}
+            )}
+            <iframe
+              key={iframeKey}
+              src={PAGE_URLS[activePage]}
+              className="a-iframe"
+              onLoad={() => setIframeLoading(false)}
+              title="Site preview"
+            />
+          </div>
         </div>
-      </main>
+      </div>
 
       <style>{`
-        *, *::before, *::after { box-sizing: border-box; }
-        .adm {
-          display: flex;
-          min-height: 100svh;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .a-wrap { display: flex; flex-direction: column; height: 100svh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1210; }
+
+        /* Header */
+        .a-header {
+          height: 52px; flex-shrink: 0;
+          background: #1e1412; border-bottom: 1px solid rgba(255,255,255,.08);
+          display: flex; align-items: center; gap: 16px; padding: 0 20px;
         }
-        /* Sidebar */
-        .adm-side {
-          width: 220px;
+        .a-hlogo { height: 28px; width: auto; }
+        .a-header-mid { flex: 1; display: flex; align-items: center; gap: 16px; }
+        .a-status { font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+        .a-kv-warn { font-size: 11px; color: #f0a500; }
+        .a-kv-warn a { color: inherit; }
+        .a-header-actions { display: flex; gap: 8px; }
+        .a-btn-ghost {
+          padding: 5px 12px; background: none; border: 1px solid rgba(255,255,255,.15);
+          color: #d8cac1; border-radius: 5px; font-size: 12px; cursor: pointer;
+          text-decoration: none; transition: border-color .15s, color .15s;
+        }
+        .a-btn-ghost:hover { border-color: rgba(255,255,255,.35); color: #fff; }
+
+        /* Body */
+        .a-body { flex: 1; display: flex; overflow: hidden; }
+
+        /* Left panel */
+        .a-left {
+          width: 380px; flex-shrink: 0;
+          background: #221614; border-right: 1px solid rgba(255,255,255,.07);
+          display: flex; flex-direction: column; overflow: hidden;
+        }
+        .a-page-tabs {
+          display: flex; border-bottom: 1px solid rgba(255,255,255,.07);
           flex-shrink: 0;
-          background: #271918;
-          display: flex;
-          flex-direction: column;
-          padding: 28px 20px;
-          position: sticky;
-          top: 0;
-          height: 100svh;
         }
-        .adm-brand {
-          margin-bottom: 36px;
-          padding-bottom: 24px;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+        .a-page-tab {
+          flex: 1; padding: 10px 4px; background: none; border: none;
+          color: #6b5a54; font-size: 12px; font-weight: 600; cursor: pointer;
+          border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+          letter-spacing: .04em; text-transform: uppercase;
         }
-        .adm-logo {
-          display: block;
-          height: 38px;
-          width: auto;
+        .a-page-tab:hover { color: #d8cac1; }
+        .a-page-tab.active { color: #d8cac1; border-bottom-color: #9b7a5e; }
+        .a-sections { flex: 1; overflow-y: auto; padding: 12px 0; }
+
+        /* Accordion section */
+        .a-sec { border-bottom: 1px solid rgba(255,255,255,.06); }
+        .a-sec-header {
+          width: 100%; display: flex; align-items: center; justify-content: space-between;
+          padding: 11px 16px; background: none; border: none; cursor: pointer;
+          color: #a89080; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+          text-transform: uppercase; text-align: left; transition: color .15s;
         }
-        .adm-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          flex: 1;
-        }
-        .adm-tab {
-          text-align: left;
-          background: none;
-          border: none;
-          color: #9b8880;
-          font-size: 14px;
-          font-weight: 500;
-          padding: 9px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background .15s, color .15s;
-        }
-        .adm-tab:hover { background: rgba(255,255,255,.06); color: #d8cac1; }
-        .adm-tab.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 600; }
-        .adm-side-footer {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .adm-view-site {
-          color: #9b7a5e;
-          font-size: 13px;
-          text-decoration: none;
-          padding: 8px 12px;
-          display: block;
-        }
-        .adm-view-site:hover { color: #d8cac1; }
-        .adm-logout {
-          width: 100%;
-          background: none;
-          border: 1px solid rgba(255,255,255,.12);
-          color: #9b8880;
-          font-size: 13px;
-          padding: 8px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          text-align: left;
-          transition: border-color .15s, color .15s;
-        }
-        .adm-logout:hover { border-color: rgba(255,255,255,.3); color: #d8cac1; }
-        /* Main */
-        .adm-main {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          min-height: 100svh;
-        }
-        .adm-topbar {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 28px 40px 20px;
-          border-bottom: 1px solid #e5e5e5;
-          background: #fff;
-          position: sticky;
-          top: 0;
-          z-index: 10;
-        }
-        .adm-section-title {
-          font-size: 20px;
-          font-weight: 600;
-          color: #271918;
-          margin: 0 0 4px;
-        }
-        .adm-notice {
-          font-size: 12px;
-          color: #b7862a;
-          margin: 0;
-        }
-        .adm-notice a { color: #b7862a; }
-        .adm-save {
-          flex-shrink: 0;
-          padding: 10px 22px;
-          background: #271918;
-          color: #f4efeb;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background .2s, opacity .2s;
-          min-width: 130px;
-        }
-        .adm-save:hover:not(:disabled) { background: #3a2b28; }
-        .adm-save:disabled { opacity: .6; cursor: default; }
-        .adm-fields {
-          padding: 36px 40px;
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-          max-width: 780px;
-        }
-        .adm-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-          gap: 16px;
-        }
-        /* Field */
-        .adm-field { display: flex; flex-direction: column; gap: 6px; }
-        .adm-field label {
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: .04em;
-          color: #271918;
-          text-transform: uppercase;
-        }
-        .adm-field .hint {
-          font-size: 11px;
-          color: #9b8880;
-          margin: -2px 0 0;
-        }
-        .adm-field input,
-        .adm-field textarea {
-          padding: 10px 14px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-size: 14px;
-          font-family: inherit;
-          color: #271918;
-          background: #fff;
-          outline: none;
-          transition: border-color .2s;
+        .a-sec-header:hover, .a-sec-header.open { color: #d8cac1; }
+        .a-sec-chevron { font-size: 10px; transition: transform .2s; }
+        .a-sec-header.open .a-sec-chevron { transform: rotate(90deg); }
+        .a-sec-body { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+        .svc-block { border-top: 1px solid rgba(255,255,255,.05); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+        /* Fields */
+        .a-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .a-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .a-field { display: flex; flex-direction: column; gap: 4px; }
+        .a-field label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6b5a54; }
+        .a-field .hint { font-size: 10px; color: #4a3428; margin-top: -2px; }
+        .a-field input, .a-field textarea {
+          background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+          border-radius: 4px; color: #d8cac1; font-size: 12px; font-family: inherit;
+          padding: 7px 9px; outline: none; transition: border-color .15s, background .15s;
           resize: vertical;
         }
-        .adm-field input:focus,
-        .adm-field textarea:focus { border-color: #9b7a5e; box-shadow: 0 0 0 3px rgba(155,122,94,.1); }
-        .adm-field textarea { min-height: 90px; line-height: 1.6; }
+        .a-field input:focus, .a-field textarea:focus {
+          border-color: #9b7a5e; background: rgba(255,255,255,.1);
+        }
+        .a-field textarea { min-height: 70px; line-height: 1.5; }
+
+        /* Canvas */
+        .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .a-canvas-bar {
+          height: 40px; flex-shrink: 0;
+          background: #181210; border-bottom: 1px solid rgba(255,255,255,.06);
+          display: flex; align-items: center; padding: 0 12px; gap: 12px;
+        }
+        .a-canvas-tabs { display: flex; gap: 2px; }
+        .a-ctab {
+          padding: 4px 10px; background: none; border: none;
+          color: #6b5a54; font-size: 11px; font-weight: 600; cursor: pointer;
+          border-radius: 4px; transition: background .15s, color .15s;
+          letter-spacing: .03em;
+        }
+        .a-ctab:hover { background: rgba(255,255,255,.06); color: #a89080; }
+        .a-ctab.active { background: rgba(255,255,255,.1); color: #d8cac1; }
+        .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; }
+        .a-iframe-wrap { flex: 1; position: relative; background: #fff; }
+        .a-iframe { width: 100%; height: 100%; border: none; display: block; }
+        .a-iframe-loading {
+          position: absolute; inset: 0; background: rgba(255,255,255,.85);
+          display: flex; align-items: center; justify-content: center; z-index: 10;
+          backdrop-filter: blur(2px);
+        }
+        .a-spinner {
+          width: 28px; height: 28px;
+          border: 2px solid #e0d8d0;
+          border-top-color: #9b7a5e;
+          border-radius: 50%;
+          animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   )
 }
 
-function Field({
-  label,
-  value,
-  onChange,
-  multiline,
-  hint,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  multiline?: boolean
-  hint?: string
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function Section({ id, label, open, toggle, children }: {
+  id: string; label: string; open: string | null; toggle: (id: string) => void; children: React.ReactNode
+}) {
+  const isOpen = open === id
+  return (
+    <div className="a-sec">
+      <button className={`a-sec-header${isOpen ? ' open' : ''}`} onClick={() => toggle(id)}>
+        {label} <span className="a-sec-chevron">›</span>
+      </button>
+      {isOpen && <div className="a-sec-body">{children}</div>}
+    </div>
+  )
+}
+
+function Row({ children, cols3 }: { children: React.ReactNode; cols3?: boolean }) {
+  return <div className={`a-row${cols3 ? ' cols-3' : ''}`}>{children}</div>
+}
+
+function F({ label, v, onChange, multi, hint }: {
+  label: string; v: string; onChange: (v: string) => void; multi?: boolean; hint?: string
 }) {
   return (
-    <div className="adm-field">
+    <div className="a-field">
       <label>{label}</label>
       {hint && <span className="hint">{hint}</span>}
-      {multiline ? (
-        <textarea value={value} onChange={e => onChange(e.target.value)} rows={4} />
-      ) : (
-        <input type="text" value={value} onChange={e => onChange(e.target.value)} />
-      )}
+      {multi
+        ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={3} />
+        : <input type="text" value={v} onChange={e => onChange(e.target.value)} />
+      }
     </div>
   )
 }

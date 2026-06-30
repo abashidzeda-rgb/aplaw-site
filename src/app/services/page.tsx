@@ -6,6 +6,7 @@ import Eyebrow from '@/components/Eyebrow'
 import FaqAccordion from '@/components/FaqAccordion'
 import FaqSchema from '@/components/FaqSchema'
 import { services, industries } from '@/lib/services'
+import { getContent } from '@/lib/content'
 
 export const metadata = {
   title: 'Practice Areas — Abashidze & Partners',
@@ -103,15 +104,16 @@ const serviceFaqs: Record<string, FaqItem[]> = {
 
 const allFaqs = Object.values(serviceFaqs).flat()
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const c = await getContent()
   return (
     <>
       <FaqSchema items={allFaqs} />
 
       <PageHero
-        eyebrow="Practice Areas"
-        title="Legal services built around your business"
-        lede="Six practice areas covering every stage of your business in Georgia — from founding through growth, transactions, and beyond."
+        eyebrow={c.services_hero.eyebrow}
+        title={c.services_hero.title}
+        lede={c.services_hero.lede}
         breadcrumb={{ label: 'Home', href: '/' }}
       />
 
@@ -181,10 +183,10 @@ export default function ServicesPage() {
       <section className="cta-band">
         <div className="wrap">
           <Reveal>
-            <h2>Have a matter to discuss?</h2>
-            <p>Tell us about your situation and we'll explain how we can help — in a free initial consultation.</p>
+            <h2>{c.services_cta.heading}</h2>
+            <p>{c.services_cta.body}</p>
             <Link href="/contact" className="btn btn-dark-gold">
-              Book a Consultation <span className="arr" aria-hidden>→</span>
+              {c.services_cta.cta} <span className="arr" aria-hidden>→</span>
             </Link>
           </Reveal>
         </div>
