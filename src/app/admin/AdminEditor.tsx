@@ -94,6 +94,16 @@ export default function AdminEditor({
             <button type="submit" className="a-btn-ghost">Log out</button>
           </form>
           <a href="/" target="_blank" className="a-btn-ghost">View site ↗</a>
+          <button
+            className="a-btn-save"
+            onClick={() => {
+              if (debounceRef.current) clearTimeout(debounceRef.current)
+              triggerSave(content)
+            }}
+            disabled={isPending || status === 'saved'}
+          >
+            {status === 'saving' ? '↻ Saving…' : status === 'saved' ? '✓ Saved' : 'Save changes'}
+          </button>
         </div>
       </header>
 
@@ -377,6 +387,13 @@ export default function AdminEditor({
           text-decoration: none; transition: border-color .15s, color .15s;
         }
         .a-btn-ghost:hover { border-color: rgba(255,255,255,.35); color: #fff; }
+        .a-btn-save {
+          padding: 6px 18px; background: #9b7a5e; border: none;
+          color: #fff; border-radius: 5px; font-size: 12px; font-weight: 700;
+          cursor: pointer; transition: background .15s, opacity .15s; letter-spacing: .03em;
+        }
+        .a-btn-save:hover:not(:disabled) { background: #b8936e; }
+        .a-btn-save:disabled { opacity: .65; cursor: default; }
 
         /* Body */
         .a-body { flex: 1; display: flex; overflow: hidden; }
