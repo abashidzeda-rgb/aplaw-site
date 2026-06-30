@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getContent } from '@/lib/content'
 
 const year = new Date().getFullYear()
 
-export default function Footer() {
+export default async function Footer() {
+  const content = await getContent()
   return (
     <footer className="site-foot">
       <div className="wrap">
@@ -18,21 +20,20 @@ export default function Footer() {
               height={50}
               style={{ height: 52, width: 'auto', marginBottom: 20 }}
             />
-            <p>
-              Business law counsel for companies operating in and through Georgia.
-              Straightforward advice. Lasting relationships.
-            </p>
+            <p>{content.footer.tagline}</p>
           </div>
 
           {/* Address */}
           <div className="foot-col">
             <h4>Office</h4>
             <address>
-              4 Chavchavadze Ave, Floor 3<br />
-              Tbilisi 0179, Georgia
+              {content.contact.address_1}<br />
+              {content.contact.address_2}
             </address>
-            <a href="tel:+995322000000" style={{ marginTop: 12 }}>+995 32 200 00 00</a>
-            <a href="mailto:info@aplaw.ge">info@aplaw.ge</a>
+            <a href={`tel:${content.contact.phone.replace(/\s/g, '')}`} style={{ marginTop: 12 }}>
+              {content.contact.phone}
+            </a>
+            <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>
           </div>
 
           {/* Navigate */}

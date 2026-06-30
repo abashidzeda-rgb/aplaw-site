@@ -6,6 +6,7 @@ import StatCounter from '@/components/StatCounter'
 import ContactForm from '@/components/ContactForm'
 import { articles } from '@/lib/articles'
 import { services } from '@/lib/services'
+import { getContent } from '@/lib/content'
 
 const stats = [
   { value: 16, unit: '+', label: 'Years of practice' },
@@ -21,7 +22,8 @@ const approachSteps = [
   { n: '04', title: 'Stay accountable', body: 'We maintain close partner involvement on every matter. You always know who is responsible and how your matter is progressing.' },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const content = await getContent()
   const previewArticles = articles.slice(0, 4)
 
   return (
@@ -34,22 +36,21 @@ export default function Home() {
           aria-hidden
         />
         <div className="wrap hero-content">
-          <Eyebrow>Business Law Firm · Est. 2013</Eyebrow>
+          <Eyebrow>{content.hero.eyebrow}</Eyebrow>
           <h1>
-            Clear counsel<br />
-            for <em>business</em><br />
-            in Georgia.
+            {content.hero.headline_1}<br />
+            for <em>{content.hero.headline_em}</em><br />
+            {content.hero.headline_3}
           </h1>
           <p className="lede" style={{ color: 'var(--ink-soft)', maxWidth: 520 }}>
-            Abashidze &amp; Partners provides straightforward legal advice to companies
-            operating in and through Georgia — from first registration to complex M&amp;A.
+            {content.hero.lede}
           </p>
           <div className="hero-btns">
             <Link href="/services" className="btn btn-gold">
-              Explore Services <span className="arr" aria-hidden>→</span>
+              {content.hero.cta_primary} <span className="arr" aria-hidden>→</span>
             </Link>
             <Link href="/contact" className="btn btn-ghost">
-              Talk to a Lawyer
+              {content.hero.cta_secondary}
             </Link>
           </div>
         </div>
@@ -64,14 +65,14 @@ export default function Home() {
         <div className="wrap">
           <div className="split">
             <Reveal>
-              <Eyebrow>About the firm</Eyebrow>
+              <Eyebrow>{content.about_preview.eyebrow}</Eyebrow>
               <h2 className="section-title" style={{ fontSize: 'clamp(32px,5vw,58px)', fontWeight: 300, marginBlock: '16px 20px' }}>
-                Rooted in Tbilisi.<br />Fluent in business.
+                {content.about_preview.headline.split('\n').map((line, i, arr) => (
+                  <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+                ))}
               </h2>
               <p style={{ color: 'var(--ink-soft)', fontSize: 17, lineHeight: 1.7, marginBottom: 8 }}>
-                Founded in 2013, Abashidze &amp; Partners has grown into one of Tbilisi's
-                leading business law practices. We serve local companies, foreign investors,
-                and international firms with Georgian operations.
+                {content.about_preview.body}
               </p>
               <div className="about-points">
                 {[

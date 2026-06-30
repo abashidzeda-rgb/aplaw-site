@@ -3,6 +3,7 @@ import { Newsreader, Hanken_Grotesk } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import SiteWrapper from '@/components/SiteWrapper'
 
 const newsreader = Newsreader({
   subsets: ['latin'],
@@ -29,9 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${newsreader.variable} ${hankenGrotesk.variable}`}>
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <SiteWrapper header={<Header />} footer={<Footer />}>
+          {children}
+        </SiteWrapper>
       </body>
     </html>
   )

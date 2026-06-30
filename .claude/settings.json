@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/ --max-time 3)",
+      "Bash(ps -p 84030 -o pid,command)",
+      "Bash(find / -maxdepth 6 -iname \"*chromium-cli*\")",
+      "Bash(npx playwright *)",
+      "Bash(open http://localhost:3000)",
+      "Bash(file public/logo-*.*)",
+      "Bash(python3 -c ' *)",
+      "Bash(ls -la /Users/david/.claude/projects/-Users-david-Desktop-aplaw-site/memory/ 2>/dev/null)",
+      "Read(//Users/david/.claude/projects/-Users-david-Desktop-aplaw-site/memory/**)",
+      "Bash(sips -c 100 300 -o logo-crop.png home-top.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight home-top.png)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(npm root *)",
+      "Bash(NODE_PATH=$\\(npm root -g\\) node check.mjs)",
+      "Bash(node check.mjs)",
+      "Bash(sips -g pixelHeight home-fullpage.png)",
+      "Bash(find ~/.npm /usr/local/lib/node_modules ~/Library/Caches/ms-playwright /private/tmp -maxdepth 6 -iname \"playwright\" -type d 2>/dev/null | grep node_modules)",
+      "Read(//Users/david/.npm/**)",
+      "Bash(node check2.mjs)",
+      "Bash(lsof -nP -iTCP -sTCP:LISTEN)",
+      "Bash(ps -o pid,lstart,command -p 84030)",
+      "Bash(curl -s http://localhost:3000/)"
+    ]
+  }
+}
