@@ -110,15 +110,6 @@ export default function AdminEditor({
       <div className="a-body">
         {/* ── Left Panel ── */}
         <aside className="a-left">
-          {/* Page tabs */}
-          <div className="a-page-tabs">
-            {PAGES.map(p => (
-              <button key={p.id} className={`a-page-tab${activePage === p.id ? ' active' : ''}`} onClick={() => switchPage(p.id)}>
-                {p.label}
-              </button>
-            ))}
-          </div>
-
           {/* Sections */}
           <div className="a-sections">
             {activePage === 'home' && <>
@@ -339,8 +330,17 @@ export default function AdminEditor({
         {/* ── Canvas ── */}
         <div className="a-canvas">
           <div className="a-canvas-bar">
-            <span className="a-canvas-url">aplaw-site.vercel.app{PAGE_URLS[activePage]}</span>
-            <a href={PAGE_URLS[activePage]} target="_blank" rel="noopener" className="a-canvas-open">↗ Open</a>
+            <div className="a-page-tabs">
+              {PAGES.map(p => (
+                <button key={p.id} className={`a-page-tab${activePage === p.id ? ' active' : ''}`} onClick={() => switchPage(p.id)}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="a-canvas-bar-right">
+              <span className="a-canvas-url">{PAGE_URLS[activePage]}</span>
+              <a href={PAGE_URLS[activePage]} target="_blank" rel="noopener" className="a-canvas-open">↗ Open</a>
+            </div>
           </div>
           <div className="a-iframe-wrap">
             {iframeLoading && (
@@ -398,18 +398,6 @@ export default function AdminEditor({
           background: #221614; border-right: 1px solid rgba(255,255,255,.07);
           display: flex; flex-direction: column; overflow: hidden;
         }
-        .a-page-tabs {
-          display: flex; border-bottom: 1px solid rgba(255,255,255,.07);
-          flex-shrink: 0;
-        }
-        .a-page-tab {
-          flex: 1; padding: 10px 4px; background: none; border: none;
-          color: #6b5a54; font-size: 12px; font-weight: 600; cursor: pointer;
-          border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
-          letter-spacing: .04em; text-transform: uppercase;
-        }
-        .a-page-tab:hover { color: #d8cac1; }
-        .a-page-tab.active { color: #d8cac1; border-bottom-color: #9b7a5e; }
         .a-sections { flex: 1; overflow-y: auto; padding: 12px 0; }
 
         /* Accordion section */
@@ -446,16 +434,24 @@ export default function AdminEditor({
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .a-canvas-bar {
-          height: 36px; flex-shrink: 0;
+          height: 44px; flex-shrink: 0;
           background: #181210; border-bottom: 1px solid rgba(255,255,255,.06);
           display: flex; align-items: center; justify-content: space-between;
-          padding: 0 14px; gap: 12px;
+          padding: 0 4px 0 0;
         }
+        .a-page-tabs { display: flex; align-items: stretch; height: 100%; }
+        .a-page-tab {
+          padding: 0 18px; background: none; border: none; border-right: 1px solid rgba(255,255,255,.06);
+          color: #6b5a54; font-size: 12px; font-weight: 600; cursor: pointer;
+          letter-spacing: .05em; text-transform: uppercase;
+          transition: color .15s, background .15s;
+          border-bottom: 2px solid transparent;
+        }
+        .a-page-tab:hover { color: #d8cac1; background: rgba(255,255,255,.04); }
+        .a-page-tab.active { color: #d8cac1; border-bottom-color: #9b7a5e; background: rgba(255,255,255,.05); }
+        .a-canvas-bar-right { display: flex; align-items: center; gap: 12px; padding: 0 12px; }
         .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; font-family: monospace; }
-        .a-canvas-open {
-          font-size: 11px; color: #6b5a54; text-decoration: none;
-          transition: color .15s;
-        }
+        .a-canvas-open { font-size: 11px; color: #6b5a54; text-decoration: none; transition: color .15s; }
         .a-canvas-open:hover { color: #d8cac1; }
         .a-iframe-wrap { flex: 1; position: relative; background: #fff; }
         .a-iframe { width: 100%; height: 100%; border: none; display: block; }
