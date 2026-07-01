@@ -72,13 +72,19 @@ export default async function ContactPage() {
                     {c.contact.hours_days}<br />{c.contact.hours_time}
                   </div>
                 </div>
+                {(c.socials ?? []).filter(s => s.enabled).length > 0 && (
                 <div className="contact-info-row">
                   <span className="cir-label">Follow</span>
                   <div className="cir-value">
-                    <a href={c.contact.linkedin_url} target="_blank" rel="noopener noreferrer">LinkedIn</a>{' · '}
-                    <a href={c.contact.facebook_url} target="_blank" rel="noopener noreferrer">Facebook</a>
+                    {(c.socials ?? []).filter(s => s.enabled).map((s, i, arr) => (
+                      <span key={s.platform}>
+                        <a href={s.url} target="_blank" rel="noopener noreferrer">{s.platform}</a>
+                        {i < arr.length - 1 && ' · '}
+                      </span>
+                    ))}
                   </div>
                 </div>
+                )}
               </div>
             </Reveal>
 

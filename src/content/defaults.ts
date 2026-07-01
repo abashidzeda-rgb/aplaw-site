@@ -10,9 +10,11 @@ export const defaultContent = {
     email: 'info@aplaw.ge',
     hours_days: 'Monday – Friday',
     hours_time: '9:00 – 18:00 (GET)',
-    linkedin_url: 'https://linkedin.com',
-    facebook_url: 'https://facebook.com',
   },
+  socials: [
+    { platform: 'LinkedIn', url: 'https://linkedin.com', enabled: true },
+    { platform: 'Facebook', url: 'https://facebook.com', enabled: true },
+  ] as Array<{ platform: string; url: string; enabled: boolean }>,
   footer: {
     tagline: 'Business law counsel for companies operating in and through Georgia. Straightforward advice. Lasting relationships.',
   },

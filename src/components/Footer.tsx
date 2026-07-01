@@ -49,8 +49,9 @@ export default async function Footer() {
           {/* Connect */}
           <div className="foot-col">
             <h4>Connect</h4>
-            <a href={content.contact.linkedin_url} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href={content.contact.facebook_url} target="_blank" rel="noopener noreferrer">Facebook</a>
+            {(content.socials ?? []).filter(s => s.enabled).map(s => (
+              <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer">{s.platform}</a>
+            ))}
             <Link href="/contact">Book a Consultation</Link>
           </div>
 

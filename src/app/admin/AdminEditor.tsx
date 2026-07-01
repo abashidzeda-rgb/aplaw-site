@@ -131,6 +131,45 @@ export default function AdminEditor({
     triggerSave(newContent)
   }
 
+  // ── Socials ──────────────────────────────────────────────────────────
+  function setSocialField(index: number, field: 'platform' | 'url', value: string) {
+    const updated = [...(latestContent.current.socials ?? [])]
+    updated[index] = { ...updated[index], [field]: value }
+    const newContent = { ...latestContent.current, socials: updated }
+    latestContent.current = newContent
+    setContent(newContent)
+    setStatus('idle')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => triggerSave(latestContent.current), 700)
+  }
+
+  function toggleSocial(index: number) {
+    const updated = [...(latestContent.current.socials ?? [])]
+    updated[index] = { ...updated[index], enabled: !updated[index].enabled }
+    const newContent = { ...latestContent.current, socials: updated }
+    latestContent.current = newContent
+    setContent(newContent)
+    triggerSave(newContent)
+  }
+
+  function addSocial() {
+    const updated = [...(latestContent.current.socials ?? []), { platform: 'New Platform', url: 'https://', enabled: true }]
+    const newContent = { ...latestContent.current, socials: updated }
+    latestContent.current = newContent
+    setContent(newContent)
+    triggerSave(newContent)
+  }
+
+  function deleteSocial(index: number) {
+    if (!confirm('Remove this social link?')) return
+    const updated = [...(latestContent.current.socials ?? [])]
+    updated.splice(index, 1)
+    const newContent = { ...latestContent.current, socials: updated }
+    latestContent.current = newContent
+    setContent(newContent)
+    triggerSave(newContent)
+  }
+
   function moveArticle(index: number, dir: -1 | 1) {
     const updated = [...(latestContent.current.articles ?? [])]
     const swap = index + dir
@@ -450,8 +489,34 @@ export default function AdminEditor({
                 </Row>
               </Section>
               <Section id="social" label="Social Links" open={openSection} toggle={toggle}>
-                <F label="LinkedIn URL" v={content.contact.linkedin_url} onChange={v => set('contact', 'linkedin_url', v)} />
-                <F label="Facebook URL" v={content.contact.facebook_url} onChange={v => set('contact', 'facebook_url', v)} />
+                {(content.socials ?? []).map((s, i) => (
+                  <div key={i} className="a-social-row">
+                    <button
+                      type="button"
+                      className={`a-social-toggle${s.enabled ? ' on' : ''}`}
+                      onClick={() => toggleSocial(i)}
+                      title={s.enabled ? 'Visible — click to hide' : 'Hidden — click to show'}
+                    >
+                      {s.enabled ? '●' : '○'}
+                    </button>
+                    <input
+                      className="a-social-name"
+                      type="text"
+                      value={s.platform}
+                      onChange={e => setSocialField(i, 'platform', e.target.value)}
+                      placeholder="Platform name"
+                    />
+                    <input
+                      className="a-social-url"
+                      type="text"
+                      value={s.url}
+                      onChange={e => setSocialField(i, 'url', e.target.value)}
+                      placeholder="https://..."
+                    />
+                    <button type="button" className="a-act-btn danger" onClick={() => deleteSocial(i)} title="Remove">×</button>
+                  </div>
+                ))}
+                <button type="button" className="a-btn-add" style={{ marginTop: 6 }} onClick={addSocial}>+ Add social</button>
               </Section>
               <Section id="footer" label="Footer" open={openSection} toggle={toggle}>
                 <F label="Tagline" v={content.footer.tagline} onChange={v => set('footer', 'tagline', v)} multi />
@@ -638,6 +703,28 @@ export default function AdminEditor({
           letter-spacing: .04em; transition: background .15s;
         }
         .a-btn-add:hover { background: rgba(155,122,94,.4); }
+
+        /* Social links manager */
+        .a-social-row { display: flex; align-items: center; gap: 6px; }
+        .a-social-toggle {
+          flex-shrink: 0; width: 22px; background: none; border: none; cursor: pointer;
+          font-size: 14px; padding: 0; line-height: 1; color: #4a3428; transition: color .15s;
+        }
+        .a-social-toggle.on { color: #4caf7d; }
+        .a-social-name {
+          width: 100px; flex-shrink: 0;
+          background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+          border-radius: 4px; color: #d8cac1; font-size: 12px; font-family: inherit;
+          padding: 6px 8px; outline: none; transition: border-color .15s;
+        }
+        .a-social-url {
+          flex: 1;
+          background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+          border-radius: 4px; color: #d8cac1; font-size: 12px; font-family: inherit;
+          padding: 6px 8px; outline: none; transition: border-color .15s;
+        }
+        .a-social-name:focus, .a-social-url:focus { border-color: #9b7a5e; }
+
         .a-article-row { border-bottom: 1px solid rgba(255,255,255,.05); }
         .a-article-toggle {
           width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px 16px;
