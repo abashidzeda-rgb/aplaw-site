@@ -3,6 +3,8 @@
 import { put } from '@vercel/blob'
 import { isAdmin } from './auth'
 
+// BLOB_READ_WRITE_TOKEN is the public images store (aplaw-images).
+// Author photos uploaded here are publicly accessible without auth.
 export async function uploadImageAction(formData: FormData): Promise<string> {
   if (!(await isAdmin())) throw new Error('Unauthorized')
   const file = formData.get('file') as File
