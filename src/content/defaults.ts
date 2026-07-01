@@ -112,6 +112,7 @@ export const defaultContent = {
   about_story: {
     eyebrow: 'Our story',
     heading: 'Built on a simple idea',
+    image: '',
     body_1: 'Abashidze & Partners was founded on the belief that business clients deserve legal advice that is direct, commercially aware, and delivered by people they can actually reach.',
     body_2: 'When Giorgi Abashidze opened the firm in 2013, Tbilisi\'s legal market was dominated by large firms that often prioritised process over outcomes, and smaller outfits that lacked the depth for complex transactions. There was space for something different: a mid-sized firm with genuine expertise and an obsession with client service.',
     body_3: 'Twelve years on, that is still who we are. Our clients range from early-stage companies registering their first Georgian entity to multinationals managing complex compliance programmes. What they have in common is that they value clear advice and a firm that treats their business like its own.',

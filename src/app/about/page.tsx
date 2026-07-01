@@ -65,7 +65,7 @@ export default async function AboutPage() {
             </Reveal>
             <Reveal delay={0.1}>
               <div className="img-wrap img-4-5">
-                <Image src="https://picsum.photos/seed/story1/600/750" alt="Abashidze & Partners office" width={600} height={750} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src={c.about_story.image || 'https://picsum.photos/seed/story1/600/750'} alt="Abashidze & Partners office" width={600} height={750} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             </Reveal>
           </div>

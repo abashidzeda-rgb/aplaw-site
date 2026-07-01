@@ -317,6 +317,11 @@ export default function AdminEditor({
                   <F label="Eyebrow" v={content.about_story.eyebrow} onChange={v => set('about_story', 'eyebrow', v)} />
                   <F label="Heading" v={content.about_story.heading} onChange={v => set('about_story', 'heading', v)} />
                 </Row>
+                <ImageUpload
+                  label="Section image"
+                  value={content.about_story.image ?? ''}
+                  onChange={v => set('about_story', 'image', v)}
+                />
                 <F label="Paragraph 1" v={content.about_story.body_1} onChange={v => set('about_story', 'body_1', v)} multi />
                 <F label="Paragraph 2" v={content.about_story.body_2} onChange={v => set('about_story', 'body_2', v)} multi />
                 <F label="Paragraph 3" v={content.about_story.body_3} onChange={v => set('about_story', 'body_3', v)} multi />
