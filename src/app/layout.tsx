@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${newsreader.variable} ${hankenGrotesk.variable}`}>
       <head>
         {darkModeEnabled && (
-          <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+          <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');window.addEventListener('storage',function(e){if(e.key==='theme')document.documentElement.classList.toggle('dark',e.newValue==='dark')})}catch(e){}})()` }} />
         )}
       </head>
       <body>
