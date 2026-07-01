@@ -120,7 +120,10 @@ export default async function ServicesPage() {
       {/* Service rows */}
       <section className="section-sm">
         <div className="wrap">
-          {services.map((svc, i) => (
+          {services.map((svc, i) => {
+            const imgKey = `s${i + 1}_image` as keyof typeof c.services_items
+            const image = (c.services_items[imgKey] as string) || svc.image
+            return (
             <Reveal key={svc.id}>
               <div id={svc.id}>
                 <div className={`svc-row${i % 2 !== 0 ? ' alt' : ''}`}>
@@ -138,7 +141,7 @@ export default async function ServicesPage() {
                     </Link>
                   </div>
                   <Image
-                    src={svc.image}
+                    src={image}
                     alt={svc.title}
                     width={600}
                     height={450}
@@ -153,7 +156,8 @@ export default async function ServicesPage() {
                 )}
               </div>
             </Reveal>
-          ))}
+            )
+          })}
         </div>
       </section>
 

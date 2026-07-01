@@ -351,6 +351,12 @@ export default function AdminEditor({
                   <div key={k} className="svc-block">
                     <F label={`${String(i+1).padStart(2,'0')} Title`} v={(content.services_items as any)[`${k}_title`]} onChange={v => set('services_items', `${k}_title` as any, v)} />
                     <F label="Description" v={(content.services_items as any)[`${k}_desc`]} onChange={v => set('services_items', `${k}_desc` as any, v)} multi />
+                    <ImageUpload
+                      label="Image"
+                      aspect="wide"
+                      value={(content.services_items as any)[`${k}_image`] ?? ''}
+                      onChange={v => set('services_items', `${k}_image` as any, v)}
+                    />
                   </div>
                 ))}
               </Section>
@@ -559,6 +565,19 @@ export default function AdminEditor({
         .a-field textarea { min-height: 70px; line-height: 1.5; }
         .a-field textarea.tall { min-height: 260px; font-size: 11px; }
 
+        /* Image uploads (service thumbnails + author photo) */
+        .a-img-upload-row { display: flex; align-items: center; gap: 12px; }
+        .a-img-thumb {
+          width: 96px; height: 64px; border-radius: 4px; flex-shrink: 0;
+          background: rgba(255,255,255,.08) center/cover no-repeat;
+          border: 1px solid rgba(255,255,255,.12); cursor: pointer; position: relative;
+          display: flex; align-items: center; justify-content: center;
+          transition: border-color .15s;
+        }
+        .a-img-thumb.wide { width: 128px; height: 72px; }
+        .a-img-thumb:hover { border-color: #9b7a5e; }
+        .a-img-thumb-placeholder { font-size: 18px; color: #4a3428; }
+
         /* Author photo upload */
         .a-photo-row { display: flex; align-items: center; gap: 12px; }
         .a-avatar {
@@ -692,6 +711,55 @@ function F({ label, v, onChange, multi, hint, tall }: {
         ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={tall ? 12 : 3} className={tall ? 'tall' : undefined} />
         : <input type="text" value={v} onChange={e => onChange(e.target.value)} />
       }
+    </div>
+  )
+}
+
+function ImageUpload({ label, value, onChange, aspect }: {
+  label: string; value: string; onChange: (url: string) => void; aspect?: 'square' | 'wide'
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [preview, setPreview] = useState<string>(value)
+  const [uploading, setUploading] = useState(false)
+
+  useEffect(() => { setPreview(value) }, [value])
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const local = URL.createObjectURL(file)
+    setPreview(local)
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const url = await uploadImageAction(fd)
+      setPreview(url)
+      onChange(url)
+    } catch {
+      setPreview(value)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="a-field">
+      <label>{label}</label>
+      <div className="a-img-upload-row">
+        <div
+          className={`a-img-thumb${aspect === 'wide' ? ' wide' : ''}`}
+          onClick={() => inputRef.current?.click()}
+          style={preview ? { backgroundImage: `url(${preview})` } : undefined}
+        >
+          {!preview && <span className="a-img-thumb-placeholder">+</span>}
+          {uploading && <div className="a-avatar-uploading">↑</div>}
+        </div>
+        <button type="button" className="a-upload-btn" onClick={() => inputRef.current?.click()} disabled={uploading}>
+          {uploading ? 'Uploading…' : 'Choose image'}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      </div>
     </div>
   )
 }

@@ -182,16 +182,22 @@ export const defaultContent = {
   services_items: {
     s1_title: 'Corporate Law',
     s1_desc: 'From incorporation and shareholder agreements to corporate governance and restructuring, we advise businesses at every stage of their lifecycle in Georgia.',
+    s1_image: 'https://picsum.photos/seed/svc1/800/600',
     s2_title: 'M&A & Transactions',
     s2_desc: 'We advise acquirers, targets, and financial sponsors on the full spectrum of M&A activity in Georgia — from sell-side preparation and buy-side due diligence through to documentation, regulatory approvals, and post-completion integration support.',
+    s2_image: 'https://picsum.photos/seed/svc2/800/600',
     s3_title: 'Commercial Contracts',
     s3_desc: 'Robust commercial agreements are the foundation of stable business relationships. We draft, review, and negotiate a full range of commercial contracts.',
+    s3_image: 'https://picsum.photos/seed/svc3/800/600',
     s4_title: 'Dispute Resolution',
     s4_desc: 'When disputes arise, we provide strategic advice and representation across Georgia\'s state courts, the Arbitration Court of Georgia, and international arbitration proceedings.',
+    s4_image: 'https://picsum.photos/seed/svc4/800/600',
     s5_title: 'Employment Law',
     s5_desc: 'We support employers at every stage of the employment relationship — from drafting compliant contracts and workplace policies to managing terminations and defending employment claims.',
+    s5_image: 'https://picsum.photos/seed/svc5/800/600',
     s6_title: 'Real Estate & Development',
     s6_desc: 'Georgia\'s real estate market offers significant opportunities for domestic and foreign investors. We provide end-to-end legal support for property acquisition, development projects, and commercial leasing.',
+    s6_image: 'https://picsum.photos/seed/svc6/800/600',
   },
 
   // ── Contact page ────────────────────────────────────────────────────

@@ -25,7 +25,19 @@ export async function getContent(): Promise<SiteContent> {
         if (result && result.statusCode === 200) {
           const text = await new Response(result.stream).text()
           const stored = JSON.parse(text) as SiteContent
-          return { ...defaultContent, ...stored }
+          // Deep-merge each top-level section so new fields added to defaults
+          // are not silently dropped when an older stored snapshot exists.
+          const merged: SiteContent = { ...defaultContent }
+          for (const key of Object.keys(stored) as (keyof SiteContent)[]) {
+            const def = defaultContent[key]
+            const val = stored[key]
+            if (val && typeof val === 'object' && !Array.isArray(val) && def && typeof def === 'object') {
+              (merged as Record<string, unknown>)[key] = { ...def as object, ...val as object }
+            } else {
+              (merged as Record<string, unknown>)[key] = val
+            }
+          }
+          return merged
         }
       }
     } catch (e) {
