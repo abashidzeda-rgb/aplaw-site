@@ -72,6 +72,32 @@
   /* Cards / surfaces */
   html.dark .cta-form-card { background: var(--cream-2); border-color: var(--line); }
   html.dark .map-embed { filter: invert(0.9) hue-rotate(180deg); }
+
+  /* Dark sections — keep them dark on a dark page */
+  html.dark .section-dark { background: var(--cream-3); }
+  html.dark .section-dark h2,
+  html.dark .section-dark h3 { color: var(--ink); }
+  html.dark .section-dark > p,
+  html.dark .section-dark .eyebrow { color: var(--ink-2); }
+  html.dark .section-dark .eyebrow { opacity: 1; }
+  html.dark .approach-step h3 { color: var(--ink); }
+  html.dark .approach-step p { color: var(--ink-2); opacity: 1; }
+  html.dark .mission-quote { color: var(--ink); }
+  html.dark .mission-quote em { color: var(--gold); }
+
+  /* Footer — keep dark */
+  html.dark .site-foot { background: var(--cream-3); }
+  html.dark .foot-col p,
+  html.dark .foot-col address,
+  html.dark .foot-col a { color: var(--ink-2); }
+  html.dark .foot-col a:hover { color: var(--ink); }
+  html.dark .foot-col h4 { color: var(--ink-soft); }
+  html.dark .foot-bar { color: var(--ink-soft); border-color: var(--line); }
+  html.dark .foot-bar a { color: var(--ink-soft); }
+  html.dark .foot-bar a:hover { color: var(--ink); }
+
+  /* Services page large index numbers */
+  html.dark .svc-row-idx { color: var(--line-2); }
 }
 
 /* Dark mode theme toggle button */
