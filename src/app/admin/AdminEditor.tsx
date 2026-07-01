@@ -35,6 +35,7 @@ export default function AdminEditor({
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [iframeKey, setIframeKey] = useState(0)
   const [iframeLoading, setIframeLoading] = useState(true)
+  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Always tracks the latest content so debounced saves never use stale closures
@@ -570,12 +571,26 @@ export default function AdminEditor({
                 </button>
               ))}
             </div>
+            <div className="a-vp-btns">
+              {([
+                { id: 'desktop' as const, label: 'Desktop', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> },
+                { id: 'tablet' as const,  label: 'Tablet',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.5" strokeWidth="2" strokeLinecap="round"/></svg> },
+                { id: 'mobile' as const,  label: 'Mobile',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.5" strokeWidth="2" strokeLinecap="round"/></svg> },
+              ]).map(({ id, label, icon }) => (
+                <button
+                  key={id}
+                  className={`a-vp-btn${viewport === id ? ' active' : ''}`}
+                  onClick={() => setViewport(id)}
+                  title={label}
+                >{icon}</button>
+              ))}
+            </div>
             <div className="a-canvas-bar-right">
               <span className="a-canvas-url">{PAGE_URLS[activePage]}</span>
               <a href={PAGE_URLS[activePage]} target="_blank" rel="noopener" className="a-canvas-open">↗ Open</a>
             </div>
           </div>
-          <div className="a-iframe-wrap">
+          <div className={`a-iframe-wrap vp-${viewport}`}>
             {iframeLoading && (
               <div className="a-iframe-loading">
                 <div className="a-spinner" />
@@ -707,7 +722,7 @@ export default function AdminEditor({
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .a-canvas-bar {
-          height: 44px; flex-shrink: 0;
+          height: 44px; flex-shrink: 0; position: relative;
           background: #181210; border-bottom: 1px solid rgba(255,255,255,.06);
           display: flex; align-items: center; justify-content: space-between;
           padding: 0 4px 0 0;
@@ -722,6 +737,15 @@ export default function AdminEditor({
         }
         .a-page-tab:hover { color: #d8cac1; background: rgba(255,255,255,.04); }
         .a-page-tab.active { color: #d8cac1; border-bottom-color: #9b7a5e; background: rgba(255,255,255,.05); }
+        .a-vp-btns { display: flex; align-items: center; gap: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
+        .a-vp-btn {
+          background: none; border: none; cursor: pointer; padding: 6px 8px;
+          color: #4a3428; display: flex; align-items: center; justify-content: center;
+          border-radius: 4px; transition: color .15s, background .15s;
+        }
+        .a-vp-btn svg { width: 16px; height: 16px; }
+        .a-vp-btn:hover { color: #d8cac1; background: rgba(255,255,255,.06); }
+        .a-vp-btn.active { color: #d8cac1; background: rgba(155,122,94,.2); }
         .a-canvas-bar-right { display: flex; align-items: center; gap: 12px; padding: 0 12px; }
         .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; font-family: monospace; }
         .a-canvas-open { font-size: 11px; color: #6b5a54; text-decoration: none; transition: color .15s; }
@@ -782,8 +806,11 @@ export default function AdminEditor({
         .a-act-link { font-size: 11px; color: #6b5a54; text-decoration: none; margin-left: auto; }
         .a-act-link:hover { color: #d8cac1; }
 
-        .a-iframe-wrap { flex: 1; position: relative; background: #fff; }
+        .a-iframe-wrap { flex: 1; position: relative; background: #fff; overflow: auto; }
+        .a-iframe-wrap.vp-tablet, .a-iframe-wrap.vp-mobile { background: #0f0c0b; display: flex; align-items: flex-start; justify-content: center; padding: 16px; }
         .a-iframe { width: 100%; height: 100%; border: none; display: block; }
+        .a-iframe-wrap.vp-tablet .a-iframe { width: 768px; height: 1024px; flex-shrink: 0; box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+        .a-iframe-wrap.vp-mobile .a-iframe { width: 390px; height: 844px; flex-shrink: 0; box-shadow: 0 8px 40px rgba(0,0,0,.6); }
         .a-iframe-loading {
           position: absolute; inset: 0; background: rgba(255,255,255,.85);
           display: flex; align-items: center; justify-content: center; z-index: 10;
