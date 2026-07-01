@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SiteWrapper from '@/components/SiteWrapper'
+import ThemeToggle from '@/components/ThemeToggle'
 import { getContent } from '@/lib/content'
 
 const newsreader = Newsreader({
@@ -38,9 +39,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body>
-        <SiteWrapper header={<Header darkModeEnabled={darkModeEnabled} />} footer={<Footer />}>
+        <SiteWrapper header={<Header />} footer={<Footer />}>
           {children}
         </SiteWrapper>
+        {darkModeEnabled && (
+          <div className="theme-toggle-fixed">
+            <ThemeToggle />
+          </div>
+        )}
       </body>
     </html>
   )

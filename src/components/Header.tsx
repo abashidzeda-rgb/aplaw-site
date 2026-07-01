@@ -4,8 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import ThemeToggle from './ThemeToggle'
-
 const navLinks = [
   { href: '/',         label: 'Home' },
   { href: '/about',    label: 'About' },
@@ -14,7 +12,7 @@ const navLinks = [
   { href: '/contact',  label: 'Contact' },
 ]
 
-export default function Header({ darkModeEnabled = true }: { darkModeEnabled?: boolean }) {
+export default function Header() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -54,9 +52,8 @@ export default function Header({ darkModeEnabled = true }: { darkModeEnabled?: b
           ))}
         </nav>
 
-        {/* Desktop CTA + theme toggle */}
+        {/* Desktop CTA */}
         <div className="head-cta-group" style={{ alignItems: 'center', gap: 8 }}>
-          {darkModeEnabled && <ThemeToggle />}
           <Link href="/contact" className="btn btn-gold">
             Book Consultation <span className="arr" aria-hidden>→</span>
           </Link>
