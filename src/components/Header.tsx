@@ -55,7 +55,7 @@ export default function Header({ darkModeEnabled = true }: { darkModeEnabled?: b
         </nav>
 
         {/* Desktop CTA + theme toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="head-cta-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {darkModeEnabled && <ThemeToggle />}
           <Link href="/contact" className="btn btn-gold">
             Book Consultation <span className="arr" aria-hidden>→</span>
