@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SiteWrapper from '@/components/SiteWrapper'
+import { getContent } from '@/lib/content'
 
 const newsreader = Newsreader({
   subsets: ['latin'],
@@ -26,11 +27,18 @@ export const metadata: Metadata = {
     "Clear counsel for business in Georgia. Corporate law, M&A, dispute resolution, and more from Tbilisi's trusted business law firm.",
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const content = await getContent()
+  const darkModeEnabled = content.global?.dark_mode_enabled ?? true
   return (
     <html lang="en" className={`${newsreader.variable} ${hankenGrotesk.variable}`}>
+      <head>
+        {darkModeEnabled && (
+          <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+        )}
+      </head>
       <body>
-        <SiteWrapper header={<Header />} footer={<Footer />}>
+        <SiteWrapper header={<Header darkModeEnabled={darkModeEnabled} />} footer={<Footer />}>
           {children}
         </SiteWrapper>
       </body>

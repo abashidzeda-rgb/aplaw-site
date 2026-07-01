@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import ThemeToggle from './ThemeToggle'
 
 const navLinks = [
   { href: '/',         label: 'Home' },
@@ -13,7 +14,7 @@ const navLinks = [
   { href: '/contact',  label: 'Contact' },
 ]
 
-export default function Header() {
+export default function Header({ darkModeEnabled = true }: { darkModeEnabled?: boolean }) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -34,16 +35,10 @@ export default function Header() {
   return (
     <>
       <header className={`site-head${scrolled ? ' scrolled' : ''}`}>
-        {/* Logo */}
+        {/* Logo — ink shown in light mode, cream shown in dark mode */}
         <Link href="/" onClick={closeMenu} aria-label="Abashidze & Partners — Home">
-          <Image
-            src="/logo-ink.svg"
-            alt="Abashidze & Partners"
-            width={142}
-            height={50}
-            priority
-            style={{ height: 56, width: 'auto' }}
-          />
+          <Image className="logo-ink" src="/logo-ink.svg" alt="Abashidze & Partners" width={142} height={50} priority style={{ height: 56, width: 'auto' }} />
+          <Image className="logo-cream" src="/logo-cream.svg" alt="Abashidze & Partners" width={142} height={50} priority style={{ height: 56, width: 'auto', display: 'none' }} />
         </Link>
 
         {/* Desktop nav — absolutely centered */}
@@ -59,10 +54,13 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
-        <Link href="/contact" className="btn btn-gold">
-          Book Consultation <span className="arr" aria-hidden>→</span>
-        </Link>
+        {/* Desktop CTA + theme toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {darkModeEnabled && <ThemeToggle />}
+          <Link href="/contact" className="btn btn-gold">
+            Book Consultation <span className="arr" aria-hidden>→</span>
+          </Link>
+        </div>
 
         {/* Hamburger */}
         <button

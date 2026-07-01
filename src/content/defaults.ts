@@ -2,6 +2,11 @@ import { articles as defaultArticles } from '@/lib/articles'
 
 export const defaultContent = {
 
+  // ── Global settings ─────────────────────────────────────────────────
+  global: {
+    dark_mode_enabled: true,
+  },
+
   // ── Global / Shared ─────────────────────────────────────────────────
   contact: {
     address_1: '4 Chavchavadze Ave, Floor 3',

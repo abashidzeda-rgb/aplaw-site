@@ -1,27 +1,95 @@
 @import "tailwindcss";
 
-/* ─── Design tokens ─── */
-:root {
-  --ink:         #271918;
-  --ink-2:       #3a2b28;
-  --ink-soft:    #6b5a54;
-  --muted:       #97867e;
-  --line:        #e7ded7;
-  --line-2:      #d5c8be;
-  --paper:       #ffffff;
-  --cream:       #f4efeb;
-  --cream-2:     #ece3dc;
-  --cream-3:     #ded2c8;
-  --brand-cream: #d8cac1;
-  --gold:        #a18672;
-  --gold-bright: #d8cac1;
-  --gold-soft:   #efe6df;
-  --gold-ink:    #6e4f3a;
+/* ─── Design tokens + dark mode (both in @layer base so specificity wins over :root) ─── */
+@layer base {
+  :root {
+    --ink:         #271918;
+    --ink-2:       #3a2b28;
+    --ink-soft:    #6b5a54;
+    --muted:       #97867e;
+    --line:        #e7ded7;
+    --line-2:      #d5c8be;
+    --paper:       #ffffff;
+    --cream:       #f4efeb;
+    --cream-2:     #ece3dc;
+    --cream-3:     #ded2c8;
+    --brand-cream: #d8cac1;
+    --gold:        #a18672;
+    --gold-bright: #d8cac1;
+    --gold-soft:   #efe6df;
+    --gold-ink:    #6e4f3a;
 
-  --pad:  clamp(20px, 5vw, 80px);
-  --maxw: 1280px;
-  --ease: cubic-bezier(.2, .7, .2, 1);
+    --pad:  clamp(20px, 5vw, 80px);
+    --maxw: 1280px;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
 }
+
+@layer base {
+  html.dark {
+    --ink:         #e8ddd5;
+    --ink-2:       #c4b8b0;
+    --ink-soft:    #8a7e78;
+    --muted:       #6a6058;
+    --line:        #2e2420;
+    --line-2:      #3a3028;
+    --paper:       #1e1714;
+    --cream:       #18110f;
+    --cream-2:     #1e1714;
+    --cream-3:     #251c18;
+    --brand-cream: #d8cac1;
+    --gold:        #b89a80;
+    --gold-bright: #d8cac1;
+    --gold-soft:   #251c18;
+    --gold-ink:    #c4a882;
+  }
+
+  html.dark .site-head.scrolled {
+    background: rgba(18,11,9,.88);
+  }
+
+  /* Swap logos */
+  html.dark .logo-ink  { display: none; }
+  html.dark .logo-cream { display: block !important; }
+  .logo-cream { display: none; }
+
+  /* Hero gradient darkened */
+  html.dark .hero-bg::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(18,11,9,.25) 0%,
+      rgba(18,11,9,.6)  40%,
+      rgba(18,11,9,.96) 100%
+    );
+  }
+
+  /* Quote band background */
+  html.dark .quote-band { background: var(--cream-2); }
+
+  /* Insight cards */
+  html.dark .insight-card { background: var(--cream-2); }
+
+  /* Cards / surfaces */
+  html.dark .cta-form-card { background: var(--cream-2); border-color: var(--line); }
+  html.dark .map-embed { filter: invert(0.9) hue-rotate(180deg); }
+}
+
+/* Dark mode theme toggle button */
+.theme-toggle {
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: var(--ink-2); }
+.theme-toggle svg { width: 20px; height: 20px; }
 
 /* ─── Tailwind v4 theme mapping ─── */
 @theme inline {
@@ -1097,3 +1165,4 @@ h1, h2, h3, h4 {
 .cta-band p { color: var(--brand-cream); opacity: .75; max-width: 520px; margin: 0 auto 36px; font-size: 17px; }
 .cta-band .btn-dark-gold { background: var(--brand-cream); color: var(--ink); border: 1px solid transparent; }
 .cta-band .btn-dark-gold:hover { background: var(--cream); }
+

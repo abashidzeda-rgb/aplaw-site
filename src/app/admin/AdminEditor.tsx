@@ -521,6 +521,36 @@ export default function AdminEditor({
               <Section id="footer" label="Footer" open={openSection} toggle={toggle}>
                 <F label="Tagline" v={content.footer.tagline} onChange={v => set('footer', 'tagline', v)} multi />
               </Section>
+              <Section id="site" label="Site Settings" open={openSection} toggle={toggle}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ color: '#d8cac1', fontSize: 13 }}>Dark mode button</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cur = latestContent.current.global?.dark_mode_enabled ?? true
+                      const updated = { ...latestContent.current, global: { ...(latestContent.current.global ?? {}), dark_mode_enabled: !cur } }
+                      latestContent.current = updated
+                      setContent(updated)
+                      setStatus('idle')
+                      if (debounceRef.current) clearTimeout(debounceRef.current)
+                      debounceRef.current = setTimeout(() => triggerSave(latestContent.current), 700)
+                    }}
+                    style={{
+                      padding: '4px 14px',
+                      borderRadius: 4,
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      letterSpacing: '0.05em',
+                      background: (content.global?.dark_mode_enabled ?? true) ? '#4ade80' : '#6b7280',
+                      color: (content.global?.dark_mode_enabled ?? true) ? '#14532d' : '#f3f4f6',
+                    }}
+                  >
+                    {(content.global?.dark_mode_enabled ?? true) ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </Section>
             </>}
           </div>
         </aside>
