@@ -722,10 +722,9 @@ export default function AdminEditor({
         /* Canvas */
         .a-canvas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .a-canvas-bar {
-          height: 44px; flex-shrink: 0; position: relative;
+          height: 44px; flex-shrink: 0;
           background: #181210; border-bottom: 1px solid rgba(255,255,255,.06);
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 0 4px 0 0;
+          display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
         }
         .a-page-tabs { display: flex; align-items: stretch; height: 100%; }
         .a-page-tab {
@@ -737,7 +736,7 @@ export default function AdminEditor({
         }
         .a-page-tab:hover { color: #d8cac1; background: rgba(255,255,255,.04); }
         .a-page-tab.active { color: #d8cac1; border-bottom-color: #9b7a5e; background: rgba(255,255,255,.05); }
-        .a-vp-btns { display: flex; align-items: center; gap: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
+        .a-vp-btns { display: flex; align-items: center; gap: 2px; justify-content: center; }
         .a-vp-btn {
           background: none; border: none; cursor: pointer; padding: 6px 8px;
           color: #4a3428; display: flex; align-items: center; justify-content: center;
@@ -746,7 +745,7 @@ export default function AdminEditor({
         .a-vp-btn svg { width: 16px; height: 16px; }
         .a-vp-btn:hover { color: #d8cac1; background: rgba(255,255,255,.06); }
         .a-vp-btn.active { color: #d8cac1; background: rgba(155,122,94,.2); }
-        .a-canvas-bar-right { display: flex; align-items: center; gap: 12px; padding: 0 12px; }
+        .a-canvas-bar-right { display: flex; align-items: center; gap: 12px; padding: 0 12px; justify-content: flex-end; }
         .a-canvas-url { font-size: 11px; color: #4a3428; letter-spacing: .02em; font-family: monospace; }
         .a-canvas-open { font-size: 11px; color: #6b5a54; text-decoration: none; transition: color .15s; }
         .a-canvas-open:hover { color: #d8cac1; }
