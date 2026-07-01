@@ -597,7 +597,7 @@ export default function AdminEditor({
               </div>
             )}
             <iframe
-              key={iframeKey}
+              key={`${iframeKey}-${viewport}`}
               src={PAGE_URLS[activePage]}
               className="a-iframe"
               onLoad={() => setIframeLoading(false)}
