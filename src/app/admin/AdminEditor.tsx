@@ -39,6 +39,7 @@ export default function AdminEditor({
   const [canvasVisible, setCanvasVisible] = useState(true)
   const [sidebarWidth, setSidebarWidth] = useState(380)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -61,17 +62,20 @@ export default function AdminEditor({
     }
   }
 
-  // Sidebar resize drag
+  // Sidebar resize drag — disable iframe pointer events while dragging so the
+  // iframe doesn't swallow mousemove/mouseup events when the cursor moves over it
   function onResizeStart(e: React.MouseEvent) {
     e.preventDefault()
     const startX = e.clientX
     const startWidth = sidebarWidth
+    setIsDragging(true)
     document.body.style.cursor = 'col-resize'
     document.body.style.userSelect = 'none'
     const onMove = (ev: MouseEvent) => {
       setSidebarWidth(Math.max(240, Math.min(720, startWidth + (ev.clientX - startX))))
     }
     const onUp = () => {
+      setIsDragging(false)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
       document.removeEventListener('mousemove', onMove)
@@ -656,6 +660,7 @@ export default function AdminEditor({
               className="a-iframe"
               onLoad={() => setIframeLoading(false)}
               title="Site preview"
+              style={isDragging ? { pointerEvents: 'none' } : undefined}
             />
           </div>
         </div>}
