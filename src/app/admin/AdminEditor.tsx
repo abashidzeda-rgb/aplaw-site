@@ -36,11 +36,50 @@ export default function AdminEditor({
   const [iframeKey, setIframeKey] = useState(0)
   const [iframeLoading, setIframeLoading] = useState(true)
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
+  const [canvasVisible, setCanvasVisible] = useState(true)
+  const [sidebarWidth, setSidebarWidth] = useState(380)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
   // Always tracks the latest content so debounced saves never use stale closures
   const latestContent = useRef(content)
   useEffect(() => { latestContent.current = content }, [content])
+
+  // Fullscreen
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', handler)
+    return () => document.removeEventListener('fullscreenchange', handler)
+  }, [])
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      wrapRef.current?.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }
+
+  // Sidebar resize drag
+  function onResizeStart(e: React.MouseEvent) {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    const onMove = (ev: MouseEvent) => {
+      setSidebarWidth(Math.max(240, Math.min(720, startWidth + (ev.clientX - startX))))
+    }
+    const onUp = () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
 
   // Deep set a nested field
   function set<S extends keyof SiteContent>(section: S, field: keyof SiteContent[S], value: string) {
@@ -195,7 +234,7 @@ export default function AdminEditor({
   const statusColor = { idle: kvReady ? '#4caf7d' : '#f0a500', saving: '#9b8880', saved: '#4caf7d', error: '#e05a5a' }[status]
 
   return (
-    <div className="a-wrap">
+    <div className="a-wrap" ref={wrapRef}>
       {/* ── Header ── */}
       <header className="a-header">
         <img src="/logo-cream.svg" alt="Abashidze & Partners" className="a-hlogo" />
@@ -204,6 +243,18 @@ export default function AdminEditor({
           {!kvReady && <span className="a-kv-warn">Vercel KV not connected — <a href="https://vercel.com/docs/storage/vercel-kv" target="_blank" rel="noopener">set up KV</a> to persist across deploys</span>}
         </div>
         <div className="a-header-actions">
+          <button className="a-btn-ghost a-btn-icon" onClick={() => setCanvasVisible(v => !v)} title={canvasVisible ? 'Hide canvas' : 'Show canvas'}>
+            {canvasVisible
+              ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M15 9l3 3-3 3"/></svg>
+            }
+          </button>
+          <button className="a-btn-ghost a-btn-icon" onClick={toggleFullscreen} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
+            {isFullscreen
+              ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 01-2 2H3M21 8h-3a2 2 0 01-2-2V3M3 16h3a2 2 0 012 2v3M16 21v-3a2 2 0 012-2h3"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg>
+            }
+          </button>
           <form action={logoutAction} style={{ margin: 0 }}>
             <button type="submit" className="a-btn-ghost">Log out</button>
           </form>
@@ -223,7 +274,7 @@ export default function AdminEditor({
 
       <div className="a-body">
         {/* ── Left Panel ── */}
-        <aside className="a-left">
+        <aside className="a-left" style={canvasVisible ? { width: sidebarWidth, flexShrink: 0 } : { flex: 1, width: 'auto' }}>
           {/* Sections */}
           <div className="a-sections">
             {activePage === 'home' && <>
@@ -561,8 +612,11 @@ export default function AdminEditor({
           </div>
         </aside>
 
+        {/* ── Resize handle (canvas mode only) ── */}
+        {canvasVisible && <div className="a-resize-handle" onMouseDown={onResizeStart} />}
+
         {/* ── Canvas ── */}
-        <div className="a-canvas">
+        {canvasVisible && <div className="a-canvas">
           <div className="a-canvas-bar">
             <div className="a-page-tabs">
               {PAGES.map(p => (
@@ -604,7 +658,7 @@ export default function AdminEditor({
               title="Site preview"
             />
           </div>
-        </div>
+        </div>}
       </div>
 
       <style>{`
@@ -640,11 +694,10 @@ export default function AdminEditor({
         /* Body */
         .a-body { flex: 1; display: flex; overflow: hidden; }
 
-        /* Left panel */
+        /* Left panel — width controlled via inline style */
         .a-left {
-          width: 380px; flex-shrink: 0;
           background: #221614; border-right: 1px solid rgba(255,255,255,.07);
-          display: flex; flex-direction: column; overflow: hidden;
+          display: flex; flex-direction: column; overflow: hidden; min-width: 0;
         }
         .a-sections { flex: 1; overflow-y: auto; padding: 12px 0; }
 
@@ -823,6 +876,25 @@ export default function AdminEditor({
           animation: spin .7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Resize handle */
+        .a-resize-handle {
+          width: 5px; flex-shrink: 0; cursor: col-resize; background: transparent;
+          position: relative; transition: background .15s;
+        }
+        .a-resize-handle::after {
+          content: ''; position: absolute; inset: 0 -4px;
+        }
+        .a-resize-handle:hover { background: rgba(155,122,94,.45); }
+
+        /* Icon-only header buttons */
+        .a-btn-icon {
+          padding: 5px 7px; display: flex; align-items: center; justify-content: center;
+        }
+        .a-btn-icon svg { width: 15px; height: 15px; }
+
+        /* Fullscreen — hide browser chrome padding */
+        :fullscreen .a-wrap { height: 100svh; }
       `}</style>
     </div>
   )
