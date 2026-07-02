@@ -547,7 +547,7 @@ h1, h2, h3, h4 {
   100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .scroll-hint::after { animation: none; opacity: 1; } }
-@media (max-width: 560px) {
+@media (max-width: 820px) {
   .hero {
     min-height: 70svh;
     align-items: flex-start;
