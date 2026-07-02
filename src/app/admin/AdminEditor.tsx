@@ -100,13 +100,17 @@ export default function AdminEditor({
 
   const triggerSave = useCallback((c: SiteContent) => {
     setStatus('saving')
+    // Reset to error state after 15s so a hung save doesn't lock the UI
+    const hangTimeout = setTimeout(() => setStatus('error'), 15_000)
     startTransition(async () => {
       try {
         await saveContentAction(c)
+        clearTimeout(hangTimeout)
         setStatus('saved')
         setIframeKey(k => k + 1)
         setTimeout(() => setStatus('idle'), 2500)
       } catch {
+        clearTimeout(hangTimeout)
         setStatus('error')
       }
     })
@@ -269,9 +273,9 @@ export default function AdminEditor({
               if (debounceRef.current) clearTimeout(debounceRef.current)
               triggerSave(content)
             }}
-            disabled={isPending || status === 'saved'}
+            disabled={status === 'saving' || status === 'saved'}
           >
-            {status === 'saving' ? '↻ Saving…' : status === 'saved' ? '✓ Saved' : 'Save changes'}
+            {status === 'saving' ? '↻ Saving…' : status === 'saved' ? '✓ Saved' : status === 'error' ? '↺ Retry save' : 'Save changes'}
           </button>
         </div>
       </header>
