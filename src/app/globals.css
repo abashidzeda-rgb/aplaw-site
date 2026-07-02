@@ -312,6 +312,12 @@ h1, h2, h3, h4 {
 .menu-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+/* Header goes dark when mobile menu is open so the cream X is visible */
+.site-head:has(.menu-btn.open) {
+  background: var(--ink) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 
 .mobile-nav {
   position: fixed;
